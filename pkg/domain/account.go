@@ -48,11 +48,13 @@ func NewAccount(name string, accountType AccountType) Account {
 }
 
 type AccountSvc interface {
-	Create(a Account) (AccountIDType, error)
-	Get(ID AccountIDType) (Account, error)
+	Create(name string, accountType AccountType) (AccountIDType, error)
+	Get(id AccountIDType) (*Account, error)
+	List()([]*Account, error)
 }
 
 type AccountDB interface {
-	Create(a Account) (AccountIDType, error)
-	Get(ID AccountIDType) (Account, error)
+	Create(name string, accountType AccountType) (AccountIDType, error)
+	Get(id AccountIDType) (*Account, error)
+	List()([]*Account, error)
 }

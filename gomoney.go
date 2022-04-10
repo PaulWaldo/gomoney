@@ -6,16 +6,21 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/PaulWaldo/gomoney/internal/app"
+	"github.com/PaulWaldo/gomoney/internal/db"
 	"github.com/PaulWaldo/gomoney/internal/transactionstore"
+	"github.com/PaulWaldo/gomoney/pkg/domain"
 )
 
 type moneyServer struct {
-	store *transactionstore.TransactionStore
+	store   *transactionstore.TransactionStore
+	acctSvc domain.AccountSvc
 }
 
 func NewMoneyServer() *moneyServer {
 	store := transactionstore.New()
-	return &moneyServer{store: store}
+	db := db.NewMemoryStore()
+	return &moneyServer{store: store, acctSvc: app.NewAccountSvc(db)}
 }
 
 func (ms *moneyServer) transactionHandler(w http.ResponseWriter, req *http.Request) {
