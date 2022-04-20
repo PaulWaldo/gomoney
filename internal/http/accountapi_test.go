@@ -5,34 +5,18 @@ import (
 	"reflect"
 	"testing"
 
-	// "github.com/PaulWaldo/gomoney/mocks"
-	"github.com/PaulWaldo/gomoney/pkg/domain"
+	"github.com/PaulWaldo/gomoney/mocks"
 )
 
 func TestNewAccountAPI(t *testing.T) {
-	// mockDb := mocks.AccountDB{}
-	// mockSvc := mocks.AccountSvc{}
-	type args struct {
-		db  domain.AccountDB
-		svc domain.AccountSvc
+	mockDb := mocks.AccountDB{}
+	mockSvc := mocks.AccountSvc{}
+	api := NewAccountAPI(mockDb, mockSvc)
+	if !reflect.DeepEqual(mockDb, api.db) {
+		t.Errorf("Expexcting DB %v, but got %v", mockDb, api.db)
 	}
-	tests := []struct {
-		name string
-		args args
-		want accountAPI
-	}{
-		// {
-		// 	name: "stores parameters",
-		// 	args: args{db: mockDb, svc: mockSvc},
-		// 	want: accountAPI{db: mockDb, svc: mockSvc},
-		// },
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := NewAccountAPI(tt.args.db, tt.args.svc); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewAccountAPI() = %v, want %v", got, tt.want)
-			}
-		})
+	if !reflect.DeepEqual(mockSvc, api.svc) {
+		t.Errorf("Expexcting Svc %v, but got %v", mockSvc, api.svc)
 	}
 }
 

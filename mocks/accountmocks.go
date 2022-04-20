@@ -3,7 +3,7 @@ package mocks
 import "github.com/PaulWaldo/gomoney/pkg/domain"
 
 type AccountSvc struct {
-	GetAccountResp    domain.Account
+	GetAccountResp    *domain.Account
 	GetAccountErr     error
 	ListAccountResp   []*domain.Account
 	ListAccountErr    error
@@ -12,12 +12,16 @@ type AccountSvc struct {
 	DeleteAccountErr  error
 }
 
-func (as AccountSvc) Create(a domain.Account) (domain.AccountIDType, error) {
+func (as AccountSvc) Create(name string, accountType domain.AccountType) (domain.AccountIDType, error) {
 	return as.CreateAccountResp, as.CreateAccountErr
 }
 
-func (as AccountSvc) Get(ID domain.AccountIDType) (domain.Account, error) {
+func (as AccountSvc) Get(id domain.AccountIDType) (*domain.Account, error) {
 	return as.GetAccountResp, as.GetAccountErr
+}
+
+func (as AccountSvc) List() ([]*domain.Account, error) {
+	return as.ListAccountResp, as.ListAccountErr
 }
 
 type AccountDB struct {
@@ -38,6 +42,6 @@ func (as AccountDB) Get(id domain.AccountIDType) (*domain.Account, error) {
 	return as.GetAccountResp, as.GetAccountErr
 }
 
-func (as AccountDB)List()([]*domain.Account, error) {
+func (as AccountDB) List() ([]*domain.Account, error) {
 	return as.ListAccountResp, as.ListAccountErr
 }
