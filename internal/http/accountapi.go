@@ -21,18 +21,21 @@ type AccountAPI interface {
 	// create(req createAccountRequest) (createAccountResponse, error)
 }
 
+type muxType = *http.ServeMux
+
 type accountAPI struct {
+	mux muxType
 	db  domain.AccountDB
 	svc domain.AccountSvc
 }
 
-func NewAccountAPI(db domain.AccountDB, svc domain.AccountSvc) accountAPI {
-	a := accountAPI{db: db, svc: svc}
+func NewAccountAPI(db domain.AccountDB, svc domain.AccountSvc, mux muxType) accountAPI {
+	a := accountAPI{db: db, svc: svc, mux: mux}
 	a.registerHandlers()
 	return a
 }
 
-const path = "/account"
+const path = "/accounts"
 
 func (a accountAPI) createHandler(w http.ResponseWriter, r *http.Request) {
 	var request createAccountRequest
@@ -53,5 +56,5 @@ func (a accountAPI) createHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a accountAPI) registerHandlers() {
-	http.HandleFunc(path, a.createHandler)
+	a.mux.HandleFunc(path, a.createHandler)
 }

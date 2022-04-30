@@ -21,7 +21,8 @@ func NewMoneyServer() *moneyServer {
 	store := transactionstore.New()
 	db := db.NewMemoryStore()
 	acctSvc := app.NewAccountSvc(db)
-	accountAPI := ihttp.NewAccountAPI(db, acctSvc)
+	mux := http.NewServeMux()
+	accountAPI := ihttp.NewAccountAPI(db, acctSvc, mux)
 	return &moneyServer{
 		store:      store,
 		acctSvc:    acctSvc,
@@ -49,7 +50,6 @@ func NewMoneyServer() *moneyServer {
 // }
 
 func main() {
-	// mux := http.NewServeMux()
 	/*server := */
 	NewMoneyServer()
 	// mux.HandleFunc("/task/", server.transactionHandler)
