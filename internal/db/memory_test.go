@@ -167,9 +167,9 @@ func Test_memoryStore_List(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "show all records",
-			fields:  fields{accounts: expectedAccounts, nextId: 2},
-			want:    []*domain.Account{
+			name:   "show all records",
+			fields: fields{accounts: expectedAccounts, nextId: 2},
+			want: []*domain.Account{
 				expectedAccounts[0], expectedAccounts[1],
 			},
 			wantErr: false,
@@ -188,6 +188,52 @@ func Test_memoryStore_List(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("memoryStore.List() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_memoryStore_Delete(t *testing.T) {
+	existingAccounts := map[domain.AccountIDType]*domain.Account{
+		0: {
+			ID:          0,
+			Name:        "num1",
+			AccountType: domain.Checking,
+		},
+		1: {
+			ID:          1,
+			Name:        "num2",
+			AccountType: domain.Savings,
+		},
+	}
+
+	type fields struct {
+		accounts map[domain.AccountIDType]*domain.Account
+		nextId   domain.AccountIDType
+	}
+	type args struct {
+		id domain.AccountIDType
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "delete a record",
+			fields:  fields{accounts: existingAccounts, nextId: 2},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ms := &memoryStore{
+				accounts: tt.fields.accounts,
+				nextId:   tt.fields.nextId,
+			}
+			if err := ms.Delete(tt.args.id); (err != nil) != tt.wantErr {
+				t.Errorf("memoryStore.Delete() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
