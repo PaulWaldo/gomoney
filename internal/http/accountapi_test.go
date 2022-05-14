@@ -106,13 +106,13 @@ func Test_accountAPI_handleAccountCreate(t *testing.T) {
 	const expectedAccountID domain.AccountIDType = 123
 	var b bytes.Buffer
 	type fields struct {
-		mux               muxType
-		db                domain.AccountDB
-		svc               domain.AccountSvc
+		mux muxType
+		db  domain.AccountDB
+		svc domain.AccountSvc
 	}
 	type args struct {
-		w http.ResponseWriter
-		r *http.Request
+		w                 *httptest.ResponseRecorder
+		r                 *http.Request
 		expectedAccountID domain.AccountIDType
 	}
 	tests := []struct {
@@ -123,8 +123,8 @@ func Test_accountAPI_handleAccountCreate(t *testing.T) {
 		{
 			name: "Happy path",
 			args: args{
-				w: httptest.NewRecorder(),
-				r: httptest.NewRequest(http.MethodGet, "/accounts", &b),
+				w:                 httptest.NewRecorder(),
+				r:                 httptest.NewRequest(http.MethodGet, "/accounts", &b),
 				expectedAccountID: 123,
 			},
 			fields: fields{
@@ -142,19 +142,19 @@ func Test_accountAPI_handleAccountCreate(t *testing.T) {
 				svc: tt.fields.svc,
 			}
 			a.handleAccountCreate(tt.args.w, tt.args.r)
-	if http.ResponseRecorder(tt.args.w) != http.StatusOK {
-		t.Errorf("got HTTP status code %d, expected 200", wr.Code)
-	}
-	fmt.Println(wr.Body.String())
+			if tt.args.w.Code != http.StatusOK {
+				t.Errorf("got HTTP status code %d, expected 200", tt.args.w.Code)
+			}
+			fmt.Println(tt.args.w.Body.String())
 
-	var j createAccountResponse
-	if err := json.NewDecoder(wr.Body).Decode(&j); err != nil {
-		t.Errorf("Error decoding output: %s", err)
-	}
+			var j createAccountResponse
+			if err := json.NewDecoder(tt.args.w.Body).Decode(&j); err != nil {
+				t.Errorf("Error decoding output: %s", err)
+			}
 
-	if j.ID != expectedAccountID {
-		t.Errorf("Expecting created ID to be 0, got %d", j.ID)
-	}
+			if j.ID != expectedAccountID {
+				t.Errorf("Expecting created ID to be 0, got %d", j.ID)
+			}
 		})
 	}
 }
