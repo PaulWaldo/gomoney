@@ -42,7 +42,7 @@ func TestAccountTypeFromString(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:    "unknown",
+			name:    "unknown account type",
 			args:    args{"badvalue"},
 			want:    Unknown,
 			wantErr: true,
