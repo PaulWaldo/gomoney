@@ -3,6 +3,7 @@ package http
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -30,25 +31,6 @@ func TestNewAccountAPI(t *testing.T) {
 	}
 }
 
-func Test_accountAPI_createHandler(t *testing.T) {
-	type args struct {
-		w http.ResponseWriter
-		r *http.Request
-	}
-	tests := []struct {
-		name string
-		a    AccountAPI
-		args args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.a.handleAccountCreate(tt.args.w, tt.args.r)
-		})
-	}
-}
-
 func Test_accountAPI_registerHandlers(t *testing.T) {
 	a := AccountAPI{
 		mux: http.NewServeMux(),
@@ -69,7 +51,26 @@ func Test_accountAPI_registerHandlers(t *testing.T) {
 	}
 }
 
-func TestHandleSlothfulMessage(t *testing.T) {
+func TestHandleCreateAccountMessage_decodeInputProblem(t *testing.T) {
+	var b bytes.Buffer
+
+	wr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/accounts", &b)
+
+	var expectedAccountID domain.AccountIDType = 123
+	a := AccountAPI{
+		mux: http.NewServeMux(),
+		db:  mocks.AccountDB{},
+		svc: mocks.AccountSvc{CreateAccountResp: expectedAccountID},
+	}
+	a.handleAccountCreate(wr, req)
+	if wr.Code != http.StatusBadRequest {
+		fmt.Println(wr.Body)
+		t.Errorf("got HTTP status code %d, expected %d", wr.Code, http.StatusBadRequest)
+	}
+}
+
+func TestHandleCreateAccountMessage_happyPath(t *testing.T) {
 	input := createAccountRequest{Name: "testacct", AccountType: domain.Checking}
 	var b bytes.Buffer
 	encoder := json.NewEncoder(&b)
@@ -78,7 +79,7 @@ func TestHandleSlothfulMessage(t *testing.T) {
 	}
 
 	wr := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/sloth", &b)
+	req := httptest.NewRequest(http.MethodGet, "/accounts", &b)
 
 	var expectedAccountID domain.AccountIDType = 123
 	a := AccountAPI{
@@ -88,7 +89,7 @@ func TestHandleSlothfulMessage(t *testing.T) {
 	}
 	a.handleAccountCreate(wr, req)
 	if wr.Code != http.StatusOK {
-		t.Errorf("got HTTP status code %d, expected 200", wr.Code)
+		t.Errorf("got HTTP status code %d, expected %d", wr.Code, http.StatusOK)
 	}
 	fmt.Println(wr.Body.String())
 
@@ -102,59 +103,25 @@ func TestHandleSlothfulMessage(t *testing.T) {
 	}
 }
 
-func Test_accountAPI_handleAccountCreate(t *testing.T) {
-	const expectedAccountID domain.AccountIDType = 123
+func TestHandleCreateAccountMessage_serviceFailure(t *testing.T) {
+	input := createAccountRequest{Name: "testacct", AccountType: domain.Checking}
 	var b bytes.Buffer
-	type fields struct {
-		mux muxType
-		db  domain.AccountDB
-		svc domain.AccountSvc
+	encoder := json.NewEncoder(&b)
+	if err := encoder.Encode(input); err != nil {
+		t.Errorf("Error encoding input: %s", err)
 	}
-	type args struct {
-		w                 *httptest.ResponseRecorder
-		r                 *http.Request
-		expectedAccountID domain.AccountIDType
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-	}{
-		{
-			name: "Happy path",
-			args: args{
-				w:                 httptest.NewRecorder(),
-				r:                 httptest.NewRequest(http.MethodGet, "/accounts", &b),
-				expectedAccountID: 123,
-			},
-			fields: fields{
-				mux: http.NewServeMux(),
-				db:  mocks.AccountDB{},
-				svc: mocks.AccountSvc{CreateAccountResp: expectedAccountID},
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			a := AccountAPI{
-				mux: tt.fields.mux,
-				db:  tt.fields.db,
-				svc: tt.fields.svc,
-			}
-			a.handleAccountCreate(tt.args.w, tt.args.r)
-			if tt.args.w.Code != http.StatusOK {
-				t.Errorf("got HTTP status code %d, expected 200", tt.args.w.Code)
-			}
-			fmt.Println(tt.args.w.Body.String())
 
-			var j createAccountResponse
-			if err := json.NewDecoder(tt.args.w.Body).Decode(&j); err != nil {
-				t.Errorf("Error decoding output: %s", err)
-			}
+	wr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/accounts", &b)
 
-			if j.ID != expectedAccountID {
-				t.Errorf("Expecting created ID to be 0, got %d", j.ID)
-			}
-		})
+	a := AccountAPI{
+		mux: http.NewServeMux(),
+		db:  mocks.AccountDB{},
+		svc: mocks.AccountSvc{CreateAccountErr: errors.New("Zoiks")},
 	}
+	a.handleAccountCreate(wr, req)
+	if wr.Code != http.StatusInternalServerError {
+		t.Errorf("got HTTP status code %d, expected %d", wr.Code, http.StatusInternalServerError)
+	}
+	fmt.Println(wr.Body.String())
 }

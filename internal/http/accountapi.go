@@ -42,7 +42,7 @@ func (a AccountAPI) handleAccountCreate(w http.ResponseWriter, r *http.Request) 
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&request)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Bad Request: %s", err), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("Bad Request (unable to decode input): %s", err), http.StatusBadRequest)
 		return
 	}
 	id, err := a.svc.Create(request.Name, request.AccountType)
