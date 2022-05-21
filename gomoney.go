@@ -51,9 +51,9 @@ func NewMoneyServer() *moneyServer {
 
 func main() {
 	/*server := */
-	NewMoneyServer()
+	s := NewMoneyServer()
 	// mux.HandleFunc("/task/", server.transactionHandler)
 	log.Print("Starting server")
 	log.Fatal(http.ListenAndServe("localhost:8080", /*+os.Getenv("SERVERPORT"),
-		mux*/nil))
+		mux*/s.accountAPI.Mux))
 }

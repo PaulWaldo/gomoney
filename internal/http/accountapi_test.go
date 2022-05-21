@@ -26,14 +26,14 @@ func TestNewAccountAPI(t *testing.T) {
 	if !reflect.DeepEqual(mockSvc, api.svc) {
 		t.Errorf("Expexcting Svc %v, but got %v", mockSvc, api.svc)
 	}
-	if !reflect.DeepEqual(mux, api.mux) {
-		t.Errorf("Expexcting Mux %v, but got %v", mux, api.mux)
+	if !reflect.DeepEqual(mux, api.Mux) {
+		t.Errorf("Expexcting Mux %v, but got %v", mux, api.Mux)
 	}
 }
 
 func Test_accountAPI_registerHandlers(t *testing.T) {
 	a := AccountAPI{
-		mux: http.NewServeMux(),
+		Mux: http.NewServeMux(),
 		db:  mocks.AccountDB{},
 		svc: mocks.AccountSvc{},
 	}
@@ -42,7 +42,7 @@ func Test_accountAPI_registerHandlers(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Can't create URL: %s", err)
 	}
-	handler, pattern := a.mux.Handler(&http.Request{URL: url})
+	handler, pattern := a.Mux.Handler(&http.Request{URL: url})
 	if pattern != "/accounts" {
 		t.Errorf("Expecting pattern but got %s", pattern)
 	}
@@ -59,7 +59,7 @@ func TestHandleCreateAccountMessage_decodeInputProblem(t *testing.T) {
 
 	var expectedAccountID domain.AccountIDType = 123
 	a := AccountAPI{
-		mux: http.NewServeMux(),
+		Mux: http.NewServeMux(),
 		db:  mocks.AccountDB{},
 		svc: mocks.AccountSvc{CreateAccountResp: expectedAccountID},
 	}
@@ -71,7 +71,7 @@ func TestHandleCreateAccountMessage_decodeInputProblem(t *testing.T) {
 }
 
 func TestHandleCreateAccountMessage_happyPath(t *testing.T) {
-	input := createAccountRequest{Name: "testacct", AccountType: domain.Checking}
+	input := createAccountRequest{Name: "testacct", AccountType: domain.Checking.String()}
 	var b bytes.Buffer
 	encoder := json.NewEncoder(&b)
 	if err := encoder.Encode(input); err != nil {
@@ -83,7 +83,7 @@ func TestHandleCreateAccountMessage_happyPath(t *testing.T) {
 
 	var expectedAccountID domain.AccountIDType = 123
 	a := AccountAPI{
-		mux: http.NewServeMux(),
+		Mux: http.NewServeMux(),
 		db:  mocks.AccountDB{},
 		svc: mocks.AccountSvc{CreateAccountResp: expectedAccountID},
 	}
@@ -104,7 +104,7 @@ func TestHandleCreateAccountMessage_happyPath(t *testing.T) {
 }
 
 func TestHandleCreateAccountMessage_serviceFailure(t *testing.T) {
-	input := createAccountRequest{Name: "testacct", AccountType: domain.Checking}
+	input := createAccountRequest{Name: "testacct", AccountType: domain.Checking.String()}
 	var b bytes.Buffer
 	encoder := json.NewEncoder(&b)
 	if err := encoder.Encode(input); err != nil {
@@ -115,7 +115,7 @@ func TestHandleCreateAccountMessage_serviceFailure(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/accounts", &b)
 
 	a := AccountAPI{
-		mux: http.NewServeMux(),
+		Mux: http.NewServeMux(),
 		db:  mocks.AccountDB{},
 		svc: mocks.AccountSvc{CreateAccountErr: errors.New("Zoiks")},
 	}

@@ -8,9 +8,10 @@ import (
 	"github.com/PaulWaldo/gomoney/pkg/domain"
 )
 
+// swagger:model CreateAccount
 type createAccountRequest struct {
-	Name        string             `json:"name"`
-	AccountType domain.AccountType `json:"accountType"`
+	Name        string `json:"name"`
+	AccountType string `json:"accountType"`
 }
 
 type createAccountResponse struct {
@@ -24,19 +25,27 @@ type createAccountResponse struct {
 type muxType = *http.ServeMux
 
 type AccountAPI struct {
-	mux muxType
+	Mux muxType
 	db  domain.AccountDB
 	svc domain.AccountSvc
 }
 
 func NewAccountAPI(db domain.AccountDB, svc domain.AccountSvc, mux muxType) AccountAPI {
-	a := AccountAPI{db: db, svc: svc, mux: mux}
+	a := AccountAPI{db: db, svc: svc, Mux: mux}
 	a.registerHandlers()
 	return a
 }
 
 const path = "/accounts"
 
+// swagger:route GET /accounts admin listCompany
+// Get companies list
+//
+// security:
+// - apiKey: []
+// responses:
+//  401: CommonError
+//  200: GetCompanies
 func (a AccountAPI) handleAccountCreate(w http.ResponseWriter, r *http.Request) {
 	var request createAccountRequest
 	decoder := json.NewDecoder(r.Body)
@@ -45,7 +54,12 @@ func (a AccountAPI) handleAccountCreate(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, fmt.Sprintf("Bad Request (unable to decode input): %s", err), http.StatusBadRequest)
 		return
 	}
-	id, err := a.svc.Create(request.Name, request.AccountType)
+	acctType, err := domain.AccountTypeFromString(request.AccountType)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Bad Request: %s", err), http.StatusBadRequest)
+		return
+	}
+	id, err := a.svc.Create(request.Name, acctType)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Internal Server Error: %s", err), http.StatusInternalServerError)
 		return
@@ -56,5 +70,5 @@ func (a AccountAPI) handleAccountCreate(w http.ResponseWriter, r *http.Request) 
 }
 
 func (a AccountAPI) registerHandlers() {
-	a.mux.HandleFunc(path, a.handleAccountCreate)
+	a.Mux.HandleFunc(path, a.handleAccountCreate)
 }
