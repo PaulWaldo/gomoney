@@ -70,11 +70,11 @@ func (a AccountAPI) handleAccountCreate(w http.ResponseWriter, r *http.Request) 
 }
 
 func (a AccountAPI) accountHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
+	if r.Method == http.MethodPost {
+		a.handleAccountCreate(w, r)
 		return
 	}
-	a.handleAccountCreate(w, r)
+	w.WriteHeader(http.StatusMethodNotAllowed)
 }
 
 func (a AccountAPI) registerHandlers() {
