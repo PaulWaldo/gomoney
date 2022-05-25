@@ -69,6 +69,14 @@ func (a AccountAPI) handleAccountCreate(w http.ResponseWriter, r *http.Request) 
 	encoder.Encode(response)
 }
 
+func (a AccountAPI) accountHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	a.handleAccountCreate(w, r)
+}
+
 func (a AccountAPI) registerHandlers() {
-	a.Mux.HandleFunc(path, a.handleAccountCreate)
+	a.Mux.HandleFunc(path, a.accountHandler)
 }
