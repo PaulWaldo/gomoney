@@ -64,4 +64,30 @@ func seed(db *gorm.DB) {
 			db.Save(&w)
 		}
 	}
+
+	accountTypes := []models.AccountType{
+		{Type: "checking"},
+		{Type: "savings"},
+		{Type: "card"},
+	}
+	for _, t := range accountTypes {
+		res := db.Where(&t).First(&t)
+		// If no record exists we insert
+		if res.Error != nil && res.Error == gorm.ErrRecordNotFound {
+			db.Save(&t)
+		}
+	}
+
+	accounts := []models.Account{
+		{Name: "MyChecking", AccountType: accountTypes[0]},
+		{Name: "MySavings", AccountType: accountTypes[1]},
+		{Name: "MyCard", AccountType: accountTypes[2]},
+	}
+	for _, a := range accounts {
+		res := db.Where(&a).First(&a)
+		// If no record exists we insert
+		if res.Error != nil && res.Error == gorm.ErrRecordNotFound {
+			db.Save(&a)
+		}
+	}
 }
