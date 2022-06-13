@@ -5,6 +5,7 @@ import (
 	// "fmt"
 	// "net/http"
 
+	"net/http"
 
 	"github.com/PaulWaldo/gomoney/internal/db/models"
 	"github.com/gin-gonic/gin"
@@ -25,6 +26,8 @@ func (cont Controller) handleAccountCreate(c *gin.Context) {
 	var request createAccountRequest
 	c.Bind(&request)
 	acct := models.Account{Type: request.AccountType, Name: request.Name}
+	cont.db.Create(acct)
+	c.HTML(http.StatusOK, "accounts.gohtml", obj any)
 	// acctType, err := domain.AccountTypeFromString(request.AccountType)
 	// res := controller.db.Where(&activationToken).First(&activationToken)
 	
