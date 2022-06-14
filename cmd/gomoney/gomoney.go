@@ -3,48 +3,29 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 
-	// "github.com/PaulWaldo/gomoney/internal/app"
 	"github.com/PaulWaldo/gomoney/internal/db"
-	ihttp "github.com/PaulWaldo/gomoney/internal/http"
+	"github.com/PaulWaldo/gomoney/routes"
 	"github.com/gin-gonic/gin"
-	// "github.com/PaulWaldo/gomoney/internal/transactionstore"
-	// "github.com/PaulWaldo/gomoney/pkg/domain"
 )
 
-// type moneyServer struct {
-// 	store      *transactionstore.TransactionStore
-// 	acctSvc    domain.AccountSvc
-// 	accountAPI ihttp.AccountAPI
+// type Routable interface {
+// 	AddRoutes(r *gin.Engine)
 // }
-
-// func NewMoneyServer() *moneyServer {
-// 	store := transactionstore.New()
-// 	db := db.NewMemoryStore()
-// 	acctSvc := app.NewAccountSvc(db)
-// 	mux := http.NewServeMux()
-// 	accountAPI := ihttp.NewAccountAPI(db, acctSvc, mux)
-// 	return &moneyServer{
-// 		store:      store,
-// 		acctSvc:    acctSvc,
-// 		accountAPI: accountAPI,
-// 	}
-// }
-
-type Routable interface {
-	AddRoutes()
-}
 
 func main() {
 	db, err := db.ConnectToDatabase()
 	if err != nil {
 		panic(fmt.Sprintf("Unable to connect to database: %s", err))
 	}
-	cont := ihttp.NewController(db)
-	cont.AddRoutes(gin.Default()) 
+
+	gin.SetMode(gin.DebugMode)
+	r := gin.Default()
+	r.LoadHTMLGlob("../../internal/html/*")
+	controller := routes.NewController(db, r)
+
+	controller.AddCashFlowRoutes()
 
 	log.Print("Starting server")
-	log.Fatal(http.ListenAndServe("localhost:8080", /*+os.Getenv("SERVERPORT"),
-		mux*/nil))
+	r.Run(":8080")
 }
