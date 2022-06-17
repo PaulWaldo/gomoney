@@ -9,7 +9,7 @@ import (
 
 func (controller Controller) cashFlowHandler(c *gin.Context) {
 	// controller.
-	c.HTML(http.StatusOK, "accounts.gohtml", gin.H{
+	c.HTML(http.StatusOK, "cashflow.gohtml", gin.H{
 		"PageTitle": "Main website",
 		"Accounts": []domain.Account {domain.NewAccount("fred", domain.Checking)},
 	})

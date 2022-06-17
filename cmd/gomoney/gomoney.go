@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/PaulWaldo/gomoney/internal/db"
 	"github.com/PaulWaldo/gomoney/routes"
@@ -19,9 +20,16 @@ func main() {
 		panic(fmt.Sprintf("Unable to connect to database: %s", err))
 	}
 
-	gin.SetMode(gin.DebugMode)
+	// gin.SetMode(gin.DebugMode)
 	r := gin.Default()
-	r.LoadHTMLGlob("../../internal/html/*")
+
+	cwd, err:=os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("CWD is %s", cwd)
+
+	r.LoadHTMLGlob("../../internal/templates/*.gohtml")
 	controller := routes.NewController(db, r)
 
 	controller.AddCashFlowRoutes()
