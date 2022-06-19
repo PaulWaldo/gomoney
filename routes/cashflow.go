@@ -8,9 +8,9 @@ import (
 )
 
 func (controller Controller) cashFlowHandler(c *gin.Context) {
-	// controller.
-	c.HTML(http.StatusOK, "cashflow.gohtml", gin.H{
-		"PageTitle": "Main website",
+	// accounts = dom
+	c.HTML(http.StatusOK, "cashflow", gin.H{
+		"PageTitle": "MoneyMinder - Cashflow",
 		"Accounts": []domain.Account {domain.NewAccount("fred", domain.Checking)},
 	})
 }

@@ -2,18 +2,21 @@
 package routes
 
 import (
+	"github.com/PaulWaldo/gomoney/internal/app/service"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type Controller struct {
-	db     *gorm.DB
-	router *gin.Engine
+	// db       *gorm.DB
+	router   *gin.Engine
+	services *service.Services
 }
 
-func NewController(db *gorm.DB, router *gin.Engine) Controller {
+func NewController(router *gin.Engine, services *service.Services) Controller {
 	return Controller{
-		db: db, router: router,
+		// db:       services.,
+		router:   router,
+		services: services,
 	}
 }
 

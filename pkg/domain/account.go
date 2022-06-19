@@ -1,6 +1,10 @@
 package domain
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/PaulWaldo/gomoney/internal/db/models"
+)
 
 type AccountType struct {
 	slug string
@@ -49,12 +53,12 @@ func NewAccount(name string, accountType AccountType) Account {
 
 type AccountSvc interface {
 	Create(name string, accountType AccountType) (AccountIDType, error)
-	Get(id AccountIDType) (*Account, error)
-	List()([]*Account, error)
+	Get(id AccountIDType) (*models.Account, error)
+	List()([]*models.Account, error)
 }
 
-type AccountDB interface {
-	Create(name string, accountType AccountType) (AccountIDType, error)
-	Get(id AccountIDType) (*Account, error)
-	List()([]*Account, error)
-}
+// type AccountDB interface {
+// 	Create(name string, accountType AccountType) (AccountIDType, error)
+// 	Get(id AccountIDType) (*Account, error)
+// 	List()([]*Account, error)
+// }
