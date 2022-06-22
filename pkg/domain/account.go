@@ -1,60 +1,58 @@
 package domain
 
 import (
-	"errors"
-
 	"github.com/PaulWaldo/gomoney/internal/db/models"
 )
 
-type AccountType struct {
-	slug string
-}
+// type AccountType struct {
+// 	slug string
+// }
 
-func (r AccountType) String() string {
-	return r.slug
-}
+// func (r AccountType) String() string {
+// 	return r.slug
+// }
 
-const (
-	AccountTypeChecking   = "checking"
-	AccountTypeSavings    = "savings"
-	AccountTypeCreditCard = "creditCard"
-)
+// const (
+// 	AccountTypeChecking   = "checking"
+// 	AccountTypeSavings    = "savings"
+// 	AccountTypeCreditCard = "creditCard"
+// )
 
-var (
-	Unknown    = AccountType{""}
-	Checking   = AccountType{AccountTypeChecking}
-	Savings    = AccountType{AccountTypeSavings}
-	CreditCard = AccountType{AccountTypeCreditCard}
-)
+// var (
+// 	Unknown    = AccountType{""}
+// 	Checking   = AccountType{AccountTypeChecking}
+// 	Savings    = AccountType{AccountTypeSavings}
+// 	CreditCard = AccountType{AccountTypeCreditCard}
+// )
 
-func AccountTypeFromString(s string) (AccountType, error) {
-	switch s {
-	case Checking.slug:
-		return Checking, nil
-	case Savings.slug:
-		return Savings, nil
-	case CreditCard.slug:
-		return CreditCard, nil
-	}
+// func AccountTypeFromString(s string) (AccountType, error) {
+// 	switch s {
+// 	case Checking.slug:
+// 		return Checking, nil
+// 	case Savings.slug:
+// 		return Savings, nil
+// 	case CreditCard.slug:
+// 		return CreditCard, nil
+// 	}
 
-	return Unknown, errors.New("unknown account type: " + s)
-}
+// 	return Unknown, errors.New("unknown account type: " + s)
+// }
 
-type AccountIDType int
-type Account struct {
-	ID          AccountIDType `json:"id"`
-	Name        string        `json:"payee"`
-	AccountType AccountType   `json:"accountType"`
-}
+// type AccountIDType uint
+// type Account struct {
+// 	ID          AccountIDType `json:"id"`
+// 	Name        string        `json:"payee"`
+// 	AccountType AccountType   `json:"accountType"`
+// }
 
-func NewAccount(name string, accountType AccountType) Account {
-	return Account{Name: name, AccountType: accountType}
-}
+// func NewAccount(name string, accountType AccountType) Account {
+// 	return Account{Name: name, AccountType: accountType}
+// }
 
 type AccountSvc interface {
-	Create(name string, accountType AccountType) (AccountIDType, error)
-	Get(id AccountIDType) (*models.Account, error)
-	List()([]*models.Account, error)
+	Create(name string, accountType models.AccountType) (uint, error)
+	Get(id uint) (*models.Account, error)
+	List() ([]*models.Account, error)
 }
 
 // type AccountDB interface {

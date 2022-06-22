@@ -5,55 +5,71 @@ import (
 	"testing"
 
 	"github.com/PaulWaldo/gomoney/internal/db/models"
-	"github.com/PaulWaldo/gomoney/pkg/domain"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-// func TestNewAccountSvc(t *testing.T) {
-// 	db := mocks.AccountDB{}
-// 	svc := NewAccountSvc(db)
-// 	if svc == nil {
-// 		t.Error("Expecting an accountsvc, got nil")
-// 	}
-// }
-
-func TestMyGoodness(t *testing.T) {
-	// db, mock, _ := sqlmock.New()
-	db, err := gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
+func setupSuite(t *testing.T) (teardown func(t *testing.T), db *gorm.DB) {
+	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{SkipDefaultTransaction: true})
 	if err != nil {
 		t.Error(err)
 	}
 	db.AutoMigrate(&models.Account{})
 
-	var want = &models.Account{Name: "test", Type: domain.Checking.String()}
-	result := db.Create(want)
-	if result.Error != nil {
-		t.Error(result.Error)
-	}
-	sut := NewAccountSvc(db)
-	got, err := sut.Get(domain.AccountIDType(want.ID))
-	if err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("accountSvc.Create() = \n%v, \nwant \n%v", got, want)
-	}
+	// Return a function to teardown the test
+	teardown = func(t *testing.T) {}
+	return teardown, db
 }
+
+func setupTest(t *testing.T, db *gorm.DB) (teardown func(t *testing.T), tx *gorm.DB) {
+	tx = db.Begin()
+	teardown = func(t *testing.T) {
+		tx.Rollback()
+	}
+	return teardown, tx
+}
+
+// func Test_accountSvc_Get(t *testing.T) {
+// 	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	db.AutoMigrate(&models.Account{})
+
+// 	var want = &models.Account{Name: "test", Type: models.Checking.String()}
+// 	result := db.Create(want)
+// 	if result.Error != nil {
+// 		t.Error(result.Error)
+// 	}
+// 	sut := NewAccountSvc(db)
+// 	got, err := sut.Get(models.AccountIDType(want.ID))
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	if want.ID != got.ID {
+// 		t.Errorf("Expecting ID %d, got %d", want.ID, got.ID)
+// 	}
+// 	if want.Name != got.Name {
+// 		t.Errorf("Expecting ID %s, got %s", want.Name, got.Name)
+// 	}
+// 	if want.Type != got.Type {
+// 		t.Errorf("Expecting ID %s, got %s", want.Type, got.Type)
+// 	}
+// }
 
 // func Test_accountSvc_Create(t *testing.T) {
 // 	type fields struct {
-// 		DB domain.AccountDB
+// 		DB models.AccountDB
 // 	}
 // 	type args struct {
 // 		name        string
-// 		accountType domain.AccountType
+// 		accountType models.AccountType
 // 	}
 // 	tests := []struct {
 // 		name    string
 // 		fields  fields
 // 		args    args
-// 		want    domain.AccountIDType
+// 		want    models.AccountIDType
 // 		wantErr bool
 // 	}{
 // 		{
@@ -98,34 +114,34 @@ func TestMyGoodness(t *testing.T) {
 
 // func Test_accountSvc_Get(t *testing.T) {
 // 	type fields struct {
-// 		DB domain.AccountDB
+// 		DB models.AccountDB
 // 	}
 // 	type args struct {
-// 		ID domain.AccountIDType
+// 		ID models.AccountIDType
 // 	}
 // 	tests := []struct {
 // 		name    string
 // 		fields  fields
 // 		args    args
-// 		want    *domain.Account
+// 		want    *models.Account
 // 		wantErr bool
 // 	}{
 // 		{
 // 			name: "get available",
 // 			fields: fields{
 // 				DB: mocks.AccountDB{
-// 					GetAccountResp: &domain.Account{
+// 					GetAccountResp: &models.Account{
 // 						ID:          123,
 // 						Name:        "my acct",
-// 						AccountType: domain.Checking,
+// 						AccountType: models.Checking,
 // 					},
 // 				},
 // 			},
 // 			args: args{ID: 123},
-// 			want: &domain.Account{
+// 			want: &models.Account{
 // 				ID:          123,
 // 				Name:        "my acct",
-// 				AccountType: domain.Checking,
+// 				AccountType: models.Checking,
 // 			},
 // 			wantErr: false,
 // 		},
@@ -148,31 +164,31 @@ func TestMyGoodness(t *testing.T) {
 // }
 
 // func TestAccountSvc_List(t *testing.T) {
-// 	expectedAccounts := []*domain.Account{
+// 	expectedAccounts := []*models.Account{
 // 		{
 // 			ID:          0,
 // 			Name:        "acct1",
-// 			AccountType: domain.Checking,
+// 			AccountType: models.Checking,
 // 		},
 // 		{
 // 			ID:          1,
 // 			Name:        "acct2",
-// 			AccountType: domain.Savings,
+// 			AccountType: models.Savings,
 // 		},
 // 		{
 // 			ID:          2,
 // 			Name:        "acct3",
-// 			AccountType: domain.CreditCard,
+// 			AccountType: models.CreditCard,
 // 		},
 // 	}
 
 // 	type fields struct {
-// 		DB domain.AccountDB
+// 		DB models.AccountDB
 // 	}
 // 	tests := []struct {
 // 		name    string
 // 		fields  fields
-// 		want    []*domain.Account
+// 		want    []*models.Account
 // 		wantErr bool
 // 	}{
 // 		{
@@ -190,11 +206,11 @@ func TestMyGoodness(t *testing.T) {
 // 			name: "list error",
 // 			fields: fields{
 // 				DB: mocks.AccountDB{
-// 					ListAccountResp: []*domain.Account{},
+// 					ListAccountResp: []*models.Account{},
 // 					ListAccountErr:  errors.New("mocked error"),
 // 				},
 // 			},
-// 			want:    []*domain.Account{},
+// 			want:    []*models.Account{},
 // 			wantErr: true,
 // 		},
 // 	}
@@ -214,3 +230,133 @@ func TestMyGoodness(t *testing.T) {
 // 		})
 // 	}
 // }
+
+// func setupSuite(t *testing.T) (func(t *testing.T), *gorm.DB) {
+// 	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	if err := db.AutoMigrate(&models.Account{}); err != nil {
+// 		t.Error(err)
+// 	}
+
+// 	// Return a function to teardown the test
+// 	teardownSuite := func(t *testing.T) {
+// 	}
+// 	return teardownSuite, db
+// }
+
+// func setupTest(t *testing.T) func(t *testing.T) {
+// 	return func(t *testing.T) {}
+// }
+
+func Test_accountSvc_Create(t *testing.T) {
+	teardownSuite, db := setupSuite(t)
+	defer teardownSuite(t)
+
+	type fields struct {
+		// db *gorm.DB
+	}
+	type args struct {
+		name        string
+		accountType models.AccountType
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    uint
+		wantErr bool
+	}{
+		{
+			name:   "create success returns id",
+			fields: fields{
+				// db: db,
+			},
+			args: args{name:"My Checking", accountType: models.Checking},
+			want:    1,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			teardownTest, tx := setupTest(t, db)
+			defer teardownTest(t)
+
+			as := accountSvc{
+				db: tx,
+			}
+
+			got, err := as.Create(tt.args.name, tt.args.accountType)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("accountSvc.Create() error = '%v', wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("accountSvc.Create() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_accountSvc_Get(t *testing.T) {
+	type fields struct {
+		db *gorm.DB
+	}
+	type args struct {
+		id uint
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *models.Account
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			as := accountSvc{
+				db: tt.fields.db,
+			}
+			got, err := as.Get(tt.args.id)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("accountSvc.Get() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("accountSvc.Get() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_accountSvc_List(t *testing.T) {
+	type fields struct {
+		db *gorm.DB
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    []*models.Account
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			as := accountSvc{
+				db: tt.fields.db,
+			}
+			got, err := as.List()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("accountSvc.List() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("accountSvc.List() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
