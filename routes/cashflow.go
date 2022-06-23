@@ -3,16 +3,19 @@ package routes
 import (
 	"net/http"
 
-	"github.com/PaulWaldo/gomoney/internal/db/models"
 	"github.com/gin-gonic/gin"
 )
 
 func (controller Controller) cashFlowHandler(c *gin.Context) {
-	c.HTML(http.StatusOK, "cashflow", gin.H{
+	var status = http.StatusOK
+	accounts, err := controller.services.Account.List()
+	if err != nil {
+		status = http.StatusInternalServerError
+	}
+	c.HTML(status, "cashflow", gin.H{
 		"PageTitle": "MoneyMinder - Cashflow",
-		"Accounts": []models.Account{
-			{Name: "fred", Type: models.Checking.Slug},
-		},
+		"Error":     err,
+		"Accounts":  accounts,
 	})
 }
 

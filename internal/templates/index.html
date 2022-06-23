@@ -35,6 +35,9 @@
     <hr>
     <main>
         <div class="container">
+            {{if .Error}}
+                <div class="text-danger">.Error</div>
+            {{end}}
             <h1>Hello, world!</h1>
     </main>
     <footer></footer>

@@ -51,8 +51,8 @@ import (
 
 type AccountSvc interface {
 	Create(name string, accountType string) (uint, error)
-	Get(id uint) (*models.Account, error)
-	List() ([]*models.Account, error)
+	Get(id uint) (models.Account, error)
+	List() ([]models.Account, error)
 }
 
 // type AccountDB interface {

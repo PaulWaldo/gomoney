@@ -20,12 +20,14 @@ func (as accountSvc) Create(name string, accountType string) (uint, error) {
 	return acct.ID, res.Error
 }
 
-func (as accountSvc) Get(id uint) (*models.Account, error) {
+func (as accountSvc) Get(id uint) (models.Account, error) {
 	var acct models.Account
 	res := as.db.First(&acct, id)
-	return &acct, res.Error
+	return acct, res.Error
 }
 
-func (as accountSvc) List() ([]*models.Account, error) {
-	return []*models.Account{}, nil
+func (as accountSvc) List() ([]models.Account, error) {
+	var accounts []models.Account
+	res := as.db.Find(&accounts)
+	return accounts, res.Error
 }
