@@ -287,7 +287,7 @@ func Test_accountSvc_Create(t *testing.T) {
 				db: tx,
 			}
 
-			got, err := as.Create(tt.args.name, tt.args.accountType)
+			got, err := as.Create(tt.args.name, tt.args.accountType.Slug)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("accountSvc.Create() error = '%v', wantErr %v", err, tt.wantErr)
 				return
@@ -300,35 +300,44 @@ func Test_accountSvc_Create(t *testing.T) {
 }
 
 func Test_accountSvc_Get(t *testing.T) {
-	type fields struct {
-		db *gorm.DB
+	teardownSuite, db := setupSuite(t)
+	defer teardownSuite(t)
+	teardownTest, tx := setupTest(t, db)
+	defer teardownTest(t)
+
+	as := accountSvc{db: tx}
+
+	type datum struct {
+		account     models.Account
+		generatedId uint
 	}
-	type args struct {
-		id uint
+	data := []datum{
+		{account: models.Account{Name: "a1", Type: models.Checking.Slug}},
+		{account: models.Account{Name: "a2", Type: models.Savings.Slug}},
+		{account: models.Account{Name: "a3", Type: models.CreditCard.Slug}},
 	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    *models.Account
-		wantErr bool
-	}{
-		// TODO: Add test cases.
+
+	for i, d := range data {
+		id, err := as.Create(d.account.Name, d.account.Type)
+		if err != nil {
+			t.Errorf("accountSvc.Create() error = '%v'", err)
+		}
+		data[i].generatedId = id
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			as := accountSvc{
-				db: tt.fields.db,
-			}
-			got, err := as.Get(tt.args.id)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("accountSvc.Get() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("accountSvc.Get() = %v, want %v", got, tt.want)
-			}
-		})
+	for _, d := range data {
+		got, err := as.Get(d.generatedId)
+		if err != nil {
+			t.Errorf("accountSvc.Get() error = '%v'", err)
+		}
+		if got.ID != d.generatedId {
+			t.Errorf("Expecting ID to be %d, got %d", d.generatedId, got.ID)
+		}
+		if got.Name != d.account.Name {
+			t.Errorf("Expecting name to be %s, got %s", d.account.Name, got.Name)
+		}
+		if got.Type != d.account.Type {
+			t.Errorf("Expecting type to be %s, got %s", d.account.Type, got.Type)
+		}
 	}
 }
 

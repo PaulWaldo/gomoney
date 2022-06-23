@@ -7,11 +7,11 @@ import (
 )
 
 type AccountType struct {
-	slug string
+	Slug string
 }
 
 func (r AccountType) String() string {
-	return r.slug
+	return r.Slug
 }
 
 const (
@@ -29,11 +29,11 @@ var (
 
 func AccountTypeFromString(s string) (AccountType, error) {
 	switch s {
-	case Checking.slug:
+	case Checking.Slug:
 		return Checking, nil
-	case Savings.slug:
+	case Savings.Slug:
 		return Savings, nil
-	case CreditCard.slug:
+	case CreditCard.Slug:
 		return CreditCard, nil
 	}
 
@@ -50,5 +50,5 @@ func AccountTypeFromString(s string) (AccountType, error) {
 type Account struct {
 	gorm.Model
 	Name string
-	Type AccountType
+	Type string
 }

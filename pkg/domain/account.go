@@ -50,7 +50,7 @@ import (
 // }
 
 type AccountSvc interface {
-	Create(name string, accountType models.AccountType) (uint, error)
+	Create(name string, accountType string) (uint, error)
 	Get(id uint) (*models.Account, error)
 	List() ([]*models.Account, error)
 }

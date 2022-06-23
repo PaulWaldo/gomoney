@@ -11,7 +11,7 @@ func (controller Controller) cashFlowHandler(c *gin.Context) {
 	c.HTML(http.StatusOK, "cashflow", gin.H{
 		"PageTitle": "MoneyMinder - Cashflow",
 		"Accounts": []models.Account{
-			{Name: "fred", Type: models.Checking},
+			{Name: "fred", Type: models.Checking.Slug},
 		},
 	})
 }
