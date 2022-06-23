@@ -11,9 +11,8 @@ type Services struct {
 	Account domain.AccountSvc
 }
 
-func connectToDatabase() (*gorm.DB, error) {
+func connectToDatabase(dsn string) (*gorm.DB, error) {
 	// In-memory sqlite if no database name is specified
-	dsn := "file::memory:?cache=shared"
 	db, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
@@ -22,12 +21,33 @@ func connectToDatabase() (*gorm.DB, error) {
 	return db, nil
 }
 
+func populateDatabase(services Services) error {
+	as := services.Account
+	var err error
+	_, err = as.Create("My Checking", models.Checking.Slug)
+	if err != nil {
+		return err
+	}
+	_, err = as.Create("My Savings", models.Savings.Slug)
+	if err != nil {
+		return err
+	}
+	_, err = as.Create("My Credit Card", models.CreditCard.Slug)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func NewSqliteInMemoryServices() (*Services, error) {
-	db, err := connectToDatabase()
+	db, err := connectToDatabase("file::memory:?cache=shared")
 	if err != nil {
 		return nil, err
 	}
-	s := &Services {Account: NewAccountSvc(db)}
+	s := &Services{Account: NewAccountSvc(db)}
+	err = populateDatabase(*s)
+	if err != nil {
+		return nil, err
+	}
 	return s, nil
 }
