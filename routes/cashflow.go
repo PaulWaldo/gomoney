@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +12,7 @@ func (controller Controller) cashFlowHandler(c *gin.Context) {
 	if err != nil {
 		status = http.StatusInternalServerError
 	}
-	err = errors.New("Yikes!")
+	// err = errors.New("Yikes!")
 	c.HTML(status, "cashflow", gin.H{
 		"PageTitle": "MoneyMinder - Cashflow",
 		"Error":     err,

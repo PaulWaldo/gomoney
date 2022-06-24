@@ -29,6 +29,7 @@ func main() {
 	}
 	fmt.Printf("CWD is %s", cwd)
 	r.LoadHTMLGlob("../../templates/*")
+	r.Static("/static", "../../static")
 	services, err := service.NewSqliteInMemoryServices()
 	if err != nil {
 		panic(err)
