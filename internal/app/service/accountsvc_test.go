@@ -62,10 +62,7 @@ func Test_accountSvc_Create(t *testing.T) {
 			teardownTest, tx := setupTest(t, db)
 			defer teardownTest(t)
 
-			as := accountSvc{
-				db: tx,
-			}
-
+			as := NewAccountSvc(tx)
 			got, err := as.Create(tt.args.name, tt.args.accountType.Slug)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("accountSvc.Create() error = '%v', wantErr %v", err, tt.wantErr)
@@ -84,7 +81,7 @@ func Test_accountSvc_Get(t *testing.T) {
 	teardownTest, tx := setupTest(t, db)
 	defer teardownTest(t)
 
-	as := accountSvc{db: tx}
+	as := NewAccountSvc(tx)
 
 	type datum struct {
 		account     models.Account
@@ -126,7 +123,7 @@ func Test_accountSvc_List(t *testing.T) {
 	teardownTest, tx := setupTest(t, db)
 	defer teardownTest(t)
 
-	as := accountSvc{db: tx}
+	as := NewAccountSvc(tx)
 
 	type datum struct {
 		account     models.Account
