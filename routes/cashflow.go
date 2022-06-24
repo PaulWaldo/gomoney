@@ -14,7 +14,7 @@ func (controller Controller) cashFlowHandler(c *gin.Context) {
 		status = http.StatusInternalServerError
 	}
 	err = errors.New("Yikes!")
-	c.HTML(status, "index.html", gin.H{
+	c.HTML(status, "cashflow", gin.H{
 		"PageTitle": "MoneyMinder - Cashflow",
 		"Error":     err,
 		"Accounts":  accounts,
