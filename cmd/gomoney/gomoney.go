@@ -29,7 +29,7 @@ func main() {
 	}
 	fmt.Printf("CWD is %s", cwd)
 	r.LoadHTMLGlob("../../templates/*")
-	r.Static("/static", "../../static")
+	r.Static("/static", "../../node_modules/startbootstrap-sb-admin-2")
 	services, err := service.NewSqliteInMemoryServices()
 	if err != nil {
 		panic(err)
