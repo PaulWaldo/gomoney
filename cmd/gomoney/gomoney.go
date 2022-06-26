@@ -1,59 +1,44 @@
 package main
 
 import (
+	"fmt"
 	"log"
-	"net/http"
+	"os"
 
-	"github.com/PaulWaldo/gomoney/internal/app"
-	"github.com/PaulWaldo/gomoney/internal/db"
-	ihttp "github.com/PaulWaldo/gomoney/internal/http"
-	"github.com/PaulWaldo/gomoney/internal/transactionstore"
-	"github.com/PaulWaldo/gomoney/pkg/domain"
+	"github.com/PaulWaldo/gomoney/internal/app/service"
+	"github.com/PaulWaldo/gomoney/routes"
+	"github.com/gin-gonic/gin"
 )
 
-type moneyServer struct {
-	store      *transactionstore.TransactionStore
-	acctSvc    domain.AccountSvc
-	accountAPI ihttp.AccountAPI
-}
-
-func NewMoneyServer() *moneyServer {
-	store := transactionstore.New()
-	db := db.NewMemoryStore()
-	acctSvc := app.NewAccountSvc(db)
-	mux := http.NewServeMux()
-	accountAPI := ihttp.NewAccountAPI(db, acctSvc, mux)
-	return &moneyServer{
-		store:      store,
-		acctSvc:    acctSvc,
-		accountAPI: accountAPI,
-	}
-}
-
-// func (ms *moneyServer) transactionHandler(w http.ResponseWriter, req *http.Request) {
-// 	if req.Method == http.MethodPost {
-// 		ms.createTransactionHandler(w, req)
-// 	}
-// }
-
-// func (ms *moneyServer) createTransactionHandler(w http.ResponseWriter, req *http.Request) {
-// 	var tcr transactionstore.TransactionCreateRequest
-// 	dec := json.NewDecoder(req.Body)
-// 	err := dec.Decode(&tcr)
-// 	if err != nil {
-// 		http.Error(w, "Bad request: "+err.Error(), http.StatusBadRequest)
-// 		return
-// 	}
-// 	resp := ms.store.CreateTransaction(tcr)
-// 	enc := json.NewEncoder(w)
-// 	enc.Encode(resp)
+// type Routable interface {
+// 	AddRoutes(r *gin.Engine)
 // }
 
 func main() {
-	/*server := */
-	s := NewMoneyServer()
-	// mux.HandleFunc("/task/", server.transactionHandler)
+	// db, err := db.ConnectToDatabase()
+	// if err != nil {
+	// 	panic(fmt.Sprintf("Unable to connect to database: %s", err))
+	// }
+
+	// gin.SetMode(gin.DebugMode)
+	r := gin.Default()
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("CWD is %s", cwd)
+	r.LoadHTMLGlob("../../templates/*")
+	r.Static("/static", "../../node_modules/startbootstrap-sb-admin-2")
+	services, err := service.NewSqliteInMemoryServices()
+	if err != nil {
+		panic(err)
+	}
+	// s := routes.Services{Account: app.NewAccountSvc(db)}
+	controller := routes.NewController(r, services)
+
+	controller.AddCashFlowRoutes()
+
 	log.Print("Starting server")
-	log.Fatal(http.ListenAndServe("localhost:8080", /*+os.Getenv("SERVERPORT"),
-		mux*/s.accountAPI.Mux))
+	r.Run(":8080")
 }
