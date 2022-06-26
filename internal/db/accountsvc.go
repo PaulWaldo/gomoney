@@ -1,8 +1,8 @@
-package service
+package db
 
 import (
-	"github.com/PaulWaldo/gomoney/internal/db/models"
 	"github.com/PaulWaldo/gomoney/pkg/domain"
+	"github.com/PaulWaldo/gomoney/pkg/domain/models"
 	"gorm.io/gorm"
 )
 

@@ -40,13 +40,6 @@ func AccountTypeFromString(s string) (AccountType, error) {
 	return Unknown, errors.New("unknown account type: " + s)
 }
 
-// type AccountIDType uint
-// type Account struct {
-// 	ID          AccountIDType `json:"id"`
-// 	Name        string        `json:"payee"`
-// 	AccountType AccountType   `json:"accountType"`
-// }
-
 type Account struct {
 	gorm.Model
 	Name string

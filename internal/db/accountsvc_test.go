@@ -1,10 +1,10 @@
-package service
+package db
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/PaulWaldo/gomoney/internal/db/models"
+	"github.com/PaulWaldo/gomoney/pkg/domain/models"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )

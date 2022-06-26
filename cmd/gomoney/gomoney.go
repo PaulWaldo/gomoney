@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/PaulWaldo/gomoney/internal/app/service"
+	"github.com/PaulWaldo/gomoney/internal/db"
 	"github.com/PaulWaldo/gomoney/routes"
 	"github.com/gin-gonic/gin"
 )
@@ -30,7 +30,7 @@ func main() {
 	fmt.Printf("CWD is %s", cwd)
 	r.LoadHTMLGlob("../../templates/*")
 	r.Static("/static", "../../node_modules/startbootstrap-sb-admin-2")
-	services, err := service.NewSqliteInMemoryServices()
+	services, err := db.NewSqliteInMemoryServices()
 	if err != nil {
 		panic(err)
 	}

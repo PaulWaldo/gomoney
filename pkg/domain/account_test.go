@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/PaulWaldo/gomoney/internal/db/models"
+	"github.com/PaulWaldo/gomoney/pkg/domain/models"
 )
 
 // func TestCreateAccountType(t *testing.T) {

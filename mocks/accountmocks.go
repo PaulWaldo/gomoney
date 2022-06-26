@@ -1,8 +1,6 @@
 package mocks
 
-import (
-	"github.com/PaulWaldo/gomoney/internal/db/models"
-)
+import "github.com/PaulWaldo/gomoney/pkg/domain/models"
 
 type AccountSvc struct {
 	GetAccountResp    *models.Account

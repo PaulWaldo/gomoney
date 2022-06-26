@@ -1,15 +1,11 @@
-package service
+package db
 
 import (
-	"github.com/PaulWaldo/gomoney/internal/db/models"
 	"github.com/PaulWaldo/gomoney/pkg/domain"
+	"github.com/PaulWaldo/gomoney/pkg/domain/models"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
-
-type Services struct {
-	Account domain.AccountSvc
-}
 
 func connectToDatabase(dsn string) (*gorm.DB, error) {
 	// In-memory sqlite if no database name is specified
@@ -21,7 +17,7 @@ func connectToDatabase(dsn string) (*gorm.DB, error) {
 	return db, nil
 }
 
-func populateDatabase(services Services) error {
+func populateDatabase(services domain.Services) error {
 	as := services.Account
 	var err error
 	_, err = as.Create("My Checking", models.Checking.Slug)
@@ -39,12 +35,12 @@ func populateDatabase(services Services) error {
 	return nil
 }
 
-func NewSqliteInMemoryServices() (*Services, error) {
+func NewSqliteInMemoryServices() (*domain.Services, error) {
 	db, err := connectToDatabase("file::memory:?cache=shared")
 	if err != nil {
 		return nil, err
 	}
-	s := &Services{Account: NewAccountSvc(db)}
+	s := &domain.Services{Account: NewAccountSvc(db)}
 	err = populateDatabase(*s)
 	if err != nil {
 		return nil, err
