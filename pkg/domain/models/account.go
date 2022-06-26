@@ -42,6 +42,7 @@ func AccountTypeFromString(s string) (AccountType, error) {
 
 type Account struct {
 	gorm.Model
-	Name string
-	Type string
+	Name         string
+	Type         string
+	Transactions []Transaction
 }

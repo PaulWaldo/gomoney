@@ -1,10 +1,8 @@
-package domain
+package models
 
 import (
 	"reflect"
 	"testing"
-
-	"github.com/PaulWaldo/gomoney/pkg/domain/models"
 )
 
 // func TestCreateAccountType(t *testing.T) {
@@ -22,37 +20,37 @@ func TestAccountTypeFromString(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    models.AccountType
+		want    AccountType
 		wantErr bool
 	}{
 		{
 			name:    "checking",
 			args:    args{"checking"},
-			want:    models.Checking,
+			want:    Checking,
 			wantErr: false,
 		},
 		{
 			name:    "savings",
 			args:    args{"savings"},
-			want:    models.Savings,
+			want:    Savings,
 			wantErr: false,
 		},
 		{
 			name:    "creditCard",
 			args:    args{"creditCard"},
-			want:    models.CreditCard,
+			want:    CreditCard,
 			wantErr: false,
 		},
 		{
 			name:    "unknown account type",
 			args:    args{"badvalue"},
-			want:    models.Unknown,
+			want:    Unknown,
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := models.AccountTypeFromString(tt.args.s)
+			got, err := AccountTypeFromString(tt.args.s)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("AccountTypeFromString() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -75,23 +73,23 @@ func TestAccountTypeFromString(t *testing.T) {
 // 	}{
 // 		{
 // 			name:   "checking slug",
-// 			fields: fields{models.AccountTypeChecking},
+// 			fields: fields{AccountTypeChecking},
 // 			want:   "checking",
 // 		},
 // 		{
 // 			name:   "creditCard slug",
-// 			fields: fields{models.AccountTypeCreditCard},
+// 			fields: fields{AccountTypeCreditCard},
 // 			want:   "creditCard",
 // 		},
 // 		{
 // 			name:   "checking slug",
-// 			fields: fields{models.AccountTypeChecking},
+// 			fields: fields{AccountTypeChecking},
 // 			want:   "checking",
 // 		},
 // 	}
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			r := models.AccountType{
+// 			r := AccountType{
 // 				slug: tt.fields.slug,
 // 			}
 // 			if got := r.String(); got != tt.want {
