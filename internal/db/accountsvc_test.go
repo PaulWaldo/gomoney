@@ -5,21 +5,20 @@ import (
 	"time"
 
 	"github.com/PaulWaldo/gomoney/pkg/domain/models"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-func setupSuite(t *testing.T) (teardown func(t *testing.T), db *gorm.DB) {
-	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{SkipDefaultTransaction: true})
-	if err != nil {
-		t.Error(err)
-	}
-	db.AutoMigrate(&models.Account{}, &models.Transaction{})
+// func setupSuite(t *testing.T) (teardown func(t *testing.T), db *gorm.DB) {
+// 	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{SkipDefaultTransaction: true})
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	db.AutoMigrate(&models.Account{}, &models.Transaction{})
 
-	// Return a function to teardown the test
-	teardown = func(t *testing.T) {}
-	return teardown, db
-}
+// 	// Return a function to teardown the test
+// 	teardown = func(t *testing.T) {}
+// 	return teardown, db
+// }
 
 func setupTest(t *testing.T, db *gorm.DB) (teardown func(t *testing.T), tx *gorm.DB) {
 	tx = db.Begin()
@@ -30,15 +29,14 @@ func setupTest(t *testing.T, db *gorm.DB) (teardown func(t *testing.T), tx *gorm
 }
 
 func Test_accountSvc_Create(t *testing.T) {
-	teardownSuite, db := setupSuite(t)
-	defer teardownSuite(t)
+	// teardownSuite, db := setupSuite(t)
+	// defer teardownSuite(t)
 
 	type fields struct {
 		// db *gorm.DB
 	}
 	type args struct {
-		name        string
-		accountType models.AccountType
+		account models.Account
 	}
 	tests := []struct {
 		name    string
@@ -48,11 +46,9 @@ func Test_accountSvc_Create(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:   "create success returns id",
-			fields: fields{
-				// db: db,
-			},
-			args:    args{name: "My Checking", accountType: models.Checking},
+			name:    "create success returns id",
+			fields:  fields{},
+			args:    args{account: models.Account{Name: "My Checking", Type: models.Checking.Slug}},
 			want:    1,
 			wantErr: false,
 		},
@@ -63,23 +59,21 @@ func Test_accountSvc_Create(t *testing.T) {
 			defer teardownTest(t)
 
 			as := NewAccountSvc(tx)
-			newAcct, err := as.Create(tt.args.name, tt.args.accountType.Slug)
+			err := as.Create(&tt.args.account)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("accountSvc.Create() error = '%v', wantErr %v", err, tt.wantErr)
 				return
 			}
 			var got models.Account
-			tx.First(&got, newAcct.ID)
-			if !(newAcct.ID == got.ID && newAcct.Name == got.Name && newAcct.Type == got.Type) {
-				t.Fatalf("accountSvc.Create() = \n%v\n, want \n%v\n", got, newAcct)
+			tx.First(&got, tt.args.account.ID)
+			if !(tt.args.account.ID == got.ID && tt.args.account.Name == got.Name && tt.args.account.Type == got.Type) {
+				t.Fatalf("accountSvc.Create() = \n%v\n, want \n%v\n", got, tt.args.account)
 			}
 		})
 	}
 }
 
 func Test_accountSvc_Get(t *testing.T) {
-	teardownSuite, db := setupSuite(t)
-	defer teardownSuite(t)
 	teardownTest, tx := setupTest(t, db)
 	defer teardownTest(t)
 
@@ -96,11 +90,11 @@ func Test_accountSvc_Get(t *testing.T) {
 	}
 
 	for i, d := range data {
-		a, err := as.Create(d.account.Name, d.account.Type)
+		err := as.Create(&d.account)
 		if err != nil {
 			t.Fatalf("accountSvc.Create() error = '%v'", err)
 		}
-		data[i].generatedId = a.ID
+		data[i].generatedId = d.account.ID
 	}
 	for _, d := range data {
 		got, err := as.Get(d.generatedId)
@@ -120,8 +114,6 @@ func Test_accountSvc_Get(t *testing.T) {
 }
 
 func Test_accountSvc_List(t *testing.T) {
-	teardownSuite, db := setupSuite(t)
-	defer teardownSuite(t)
 	teardownTest, tx := setupTest(t, db)
 	defer teardownTest(t)
 
@@ -138,11 +130,11 @@ func Test_accountSvc_List(t *testing.T) {
 	}
 
 	for i, d := range data {
-		a, err := as.Create(d.account.Name, d.account.Type)
+		err := as.Create(&d.account)
 		if err != nil {
 			t.Fatalf("accountSvc.Create() error = '%v'", err)
 		}
-		data[i].generatedId = a.ID
+		data[i].generatedId = d.account.ID
 	}
 	accounts, err := as.List()
 	if err != nil {
@@ -177,7 +169,8 @@ func Test_accountSvc_AddTransactions(t *testing.T) {
 	defer teardownTest(t)
 
 	as := NewAccountSvc(tx)
-	acct, err := as.Create("Account", models.Checking.Slug)
+	acct := models.Account{Name: "Account", Type: models.Checking.Slug}
+	err := as.Create(&acct)
 	if err != nil {
 		t.Fatalf("Error creating account %s", err)
 	}

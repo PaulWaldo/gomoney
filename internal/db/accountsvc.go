@@ -14,10 +14,9 @@ func NewAccountSvc(db *gorm.DB) domain.AccountSvc {
 	return accountSvc{db: db}
 }
 
-func (as accountSvc) Create(name string, accountType string) (models.Account, error) {
-	acct := models.Account{Name: name, Type: accountType}
-	res := as.db.Create(&acct)
-	return acct, res.Error
+func (as accountSvc) Create(account *models.Account) error {
+	res := as.db.Create(&account)
+	return res.Error
 }
 
 func (as accountSvc) Get(id uint) (models.Account, error) {

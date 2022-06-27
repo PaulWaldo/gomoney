@@ -20,15 +20,15 @@ func connectToDatabase(dsn string) (*gorm.DB, error) {
 func populateDatabase(services domain.Services) error {
 	as := services.Account
 	var err error
-	_, err = as.Create("My Checking", models.Checking.Slug)
+	err = as.Create(&models.Account{Name: "My Checking", Type: models.Checking.Slug})
 	if err != nil {
 		return err
 	}
-	_, err = as.Create("My Savings", models.Savings.Slug)
+	err = as.Create(&models.Account{Name: "My Savings", Type: models.Savings.Slug})
 	if err != nil {
 		return err
 	}
-	_, err = as.Create("My Credit Card", models.CreditCard.Slug)
+	err = as.Create(&models.Account{Name: "My Credit Card", Type: models.CreditCard.Slug})
 	if err != nil {
 		return err
 	}

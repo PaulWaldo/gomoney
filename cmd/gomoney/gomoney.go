@@ -34,11 +34,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// s := routes.Services{Account: app.NewAccountSvc(db)}
+
 	controller := routes.NewController(r, services)
 
 	controller.AddCashFlowRoutes()
 
-	log.Print("Starting server")
+	log.Print("Starting server on port 8080")
 	r.Run(":8080")
 }
