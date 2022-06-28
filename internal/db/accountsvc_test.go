@@ -5,28 +5,8 @@ import (
 	"time"
 
 	"github.com/PaulWaldo/gomoney/pkg/domain/models"
-	"gorm.io/gorm"
 )
 
-// func setupSuite(t *testing.T) (teardown func(t *testing.T), db *gorm.DB) {
-// 	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{SkipDefaultTransaction: true})
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	db.AutoMigrate(&models.Account{}, &models.Transaction{})
-
-// 	// Return a function to teardown the test
-// 	teardown = func(t *testing.T) {}
-// 	return teardown, db
-// }
-
-func setupTest(t *testing.T, db *gorm.DB) (teardown func(t *testing.T), tx *gorm.DB) {
-	tx = db.Begin()
-	teardown = func(t *testing.T) {
-		tx.Rollback()
-	}
-	return teardown, tx
-}
 
 func Test_accountSvc_Create(t *testing.T) {
 	// teardownSuite, db := setupSuite(t)

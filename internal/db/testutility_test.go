@@ -35,3 +35,12 @@ func teardown() {
 	fmt.Printf("\033[1;36m%s\033[0m", "> Teardown completed")
 	fmt.Printf("\n")
 }
+
+func setupTest(t *testing.T, db *gorm.DB) (teardown func(t *testing.T), tx *gorm.DB) {
+	tx = db.Begin()
+	teardown = func(t *testing.T) {
+		tx.Rollback()
+	}
+	return teardown, tx
+}
+
