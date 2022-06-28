@@ -1,4 +1,4 @@
-// Package http handles all routes
+// Package routes handles all routes
 package routes
 
 import (

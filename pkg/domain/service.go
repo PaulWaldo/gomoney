@@ -10,8 +10,11 @@ type AccountSvc interface {
 }
 
 type TransactionSvc interface {
+	Create(transaction *models.Transaction) error
+	Get(id uint) (*models.Transaction, error)
 }
 
 type Services struct {
-	Account AccountSvc
+	Account     AccountSvc
+	Transaction TransactionSvc
 }
