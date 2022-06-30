@@ -8,6 +8,7 @@ import (
 	"github.com/PaulWaldo/gomoney/internal/db"
 	"github.com/PaulWaldo/gomoney/routes"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // type Routable interface {
@@ -30,7 +31,7 @@ func main() {
 	fmt.Printf("CWD is %s", cwd)
 	r.LoadHTMLGlob("../../templates/*")
 	r.Static("/static", "../../node_modules/startbootstrap-sb-admin-2")
-	services, err := db.NewSqliteInMemoryServices()
+	services, _, err := db.NewSqliteInMemoryServices(&gorm.Config{}, true)
 	if err != nil {
 		panic(err)
 	}
