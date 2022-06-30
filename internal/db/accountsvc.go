@@ -27,7 +27,7 @@ func (as accountSvc) Get(id uint) (models.Account, error) {
 
 func (as accountSvc) List() ([]models.Account, error) {
 	var accounts []models.Account
-	res := as.db.Find(&accounts)
+	res := as.db.Preload("Transactions").Find(&accounts)
 	return accounts, res.Error
 }
 func (as accountSvc) AddTransactions(a models.Account, transactions []models.Transaction) error {

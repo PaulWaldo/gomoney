@@ -7,7 +7,6 @@ import (
 	"github.com/PaulWaldo/gomoney/pkg/domain/models"
 )
 
-
 func Test_accountSvc_Create(t *testing.T) {
 	// teardownSuite, db := setupSuite(t)
 	// defer teardownSuite(t)
@@ -64,7 +63,11 @@ func Test_accountSvc_Get(t *testing.T) {
 		generatedId uint
 	}
 	data := []datum{
-		{account: models.Account{Name: "a1", Type: models.Checking.Slug}},
+		{account: models.Account{
+			Name:         "a1",
+			Type:         models.Checking.Slug,
+			Transactions: []models.Transaction{{Payee: "p1"}},
+		}},
 		{account: models.Account{Name: "a2", Type: models.Savings.Slug}},
 		{account: models.Account{Name: "a3", Type: models.CreditCard.Slug}},
 	}
@@ -76,10 +79,15 @@ func Test_accountSvc_Get(t *testing.T) {
 		}
 		data[i].generatedId = d.account.ID
 	}
-	for _, d := range data {
+	for i, d := range data {
 		got, err := as.Get(d.generatedId)
 		if err != nil {
 			t.Fatalf("accountSvc.Get() error = '%v'", err)
+		}
+		if i == 0 {
+			if len(d.account.Transactions) != 1 {
+				t.Errorf("Expecting 1 transaction for first item, got %d", len(d.account.Transactions))
+			}
 		}
 		if got.ID != d.generatedId {
 			t.Fatalf("Expecting ID to be %d, got %d", d.generatedId, got.ID)
