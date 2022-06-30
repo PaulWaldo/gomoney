@@ -68,14 +68,10 @@ func Test_transactionSvc_Create(t *testing.T) {
 }
 
 func Test_transactionSvc_Get(t *testing.T) {
-	teardownTest, tx := setupTest(t, db)
-	defer teardownTest(t)
-
 	var expected = []models.Transaction{
 		{Payee: "payee1", Type: "D", Amount: 123.45, Memo: "memo 1", Date: time.Now()},
 		{Payee: "payee2", Type: "W", Amount: 678.90, Memo: "memo 2", Date: time.Now()},
 	}
-	tx.Save(&expected)
 
 	type fields struct{}
 	type args struct {
@@ -110,6 +106,10 @@ func Test_transactionSvc_Get(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			teardownTest, tx := setupTest(t, db)
+			defer teardownTest(t)
+			tx.Save(&expected)
+
 			ts := NewTransactionSvc(tx)
 			got, err := ts.Get(tt.args.id)
 			if (err != nil) != tt.wantErr {

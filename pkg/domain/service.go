@@ -11,7 +11,8 @@ type AccountSvc interface {
 
 type TransactionSvc interface {
 	Create(transaction *models.Transaction) error
-	Get(id uint) (*models.Transaction, error)
+	Get(id uint) (models.Transaction, error)
+	List() ([]models.Transaction, error)
 }
 
 type Services struct {

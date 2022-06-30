@@ -19,23 +19,16 @@ func (ts transactionSvc) Create(transaction *models.Transaction) error {
 	return res.Error
 }
 
-func (ts transactionSvc) Get(id uint) (*models.Transaction, error) {
+func (ts transactionSvc) Get(id uint) (models.Transaction, error) {
 	var t models.Transaction
 	res := ts.db.First(&t, id)
-	return &t, res.Error
+	return t, res.Error
 }
 
-// func (ts transactionSvc) Get(id uint) (models.Account, error) {
-// 	var acct models.Account
-// 	res := ts.db.First(&acct, id)
-// 	return acct, res.Error
-// }
+func (ts transactionSvc) List() ([]models.Transaction, error) {
+	return []models.Transaction{}, nil
+}
 
-// func (ts transactionSvc) List() ([]models.Account, error) {
-// 	var accounts []models.Account
-// 	res := ts.db.Find(&accounts)
-// 	return accounts, res.Error
-// }
 // func (ts transactionSvc) AddTransactions(a models.Account, transactions []models.Transaction) error {
 // 	a.Transactions = append(a.Transactions, transactions...)
 // 	err := ts.db.Save(a).Error
