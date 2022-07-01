@@ -16,12 +16,7 @@ import (
 // }
 
 func main() {
-	// db, err := db.ConnectToDatabase()
-	// if err != nil {
-	// 	panic(fmt.Sprintf("Unable to connect to database: %s", err))
-	// }
-
-	// gin.SetMode(gin.DebugMode)
+	gin.SetMode(gin.DebugMode)
 	r := gin.Default()
 
 	cwd, err := os.Getwd()
