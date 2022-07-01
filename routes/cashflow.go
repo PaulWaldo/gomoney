@@ -22,4 +22,6 @@ func (controller Controller) cashFlowHandler(c *gin.Context) {
 
 func (controller Controller) AddCashFlowRoutes() {
 	controller.router.GET("/cashflow", controller.cashFlowHandler)
+	controller.router.GET("/", controller.cashFlowHandler)
+	controller.router.GET("/index.html", controller.cashFlowHandler)
 }
