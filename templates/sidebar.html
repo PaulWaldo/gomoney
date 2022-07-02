@@ -16,15 +16,20 @@
     <div class="sidebar-heading">Accounts</div>
 
     <!-- Accounts List -->
+    <li class="nav-item active">
+        <a class="nav-link" href="#">
+            <!-- <i class="fas fa-fw fa-badge-dollar"></i> -->
+            <i class="fas fa-fw fa-balance-scale"></i>
+            <span>All Accounts</span>
+        </a>
+    </li>
     {{range .Accounts}}
     <li class="nav-item active">
         <a class="nav-link" href="#">
-            <i class="fas fa-fw fa-building"></i>
+            <!-- <i class="fas fa-fw fa-building"></i> -->
+            <i class="far fa-fw fa-credit-card"></i>
             <span>{{.Name}}</span>
         </a>
-        {{range .Transactions}}
-    <li>{{.}}</li>
-    {{end}}
     </li>
     {{end}}
 
