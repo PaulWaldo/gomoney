@@ -6,6 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const cashflowURL = "/cashflow"
+
 func (controller Controller) cashFlowHandler(c *gin.Context) {
 	var status = http.StatusOK
 	accounts, err := controller.services.Account.List()
@@ -20,8 +22,12 @@ func (controller Controller) cashFlowHandler(c *gin.Context) {
 	})
 }
 
+func (controller Controller) cashFlowRedirectHandler(c *gin.Context) {
+	c.Redirect(http.StatusMovedPermanently, cashflowURL)
+}
+
 func (controller Controller) AddCashFlowRoutes() {
-	controller.router.GET("/cashflow", controller.cashFlowHandler)
-	controller.router.GET("/", controller.cashFlowHandler)
-	controller.router.GET("/index.html", controller.cashFlowHandler)
+	controller.router.GET(cashflowURL, controller.cashFlowHandler)
+	controller.router.GET("/", controller.cashFlowRedirectHandler)
+	controller.router.GET("/index.html", controller.cashFlowRedirectHandler)
 }
