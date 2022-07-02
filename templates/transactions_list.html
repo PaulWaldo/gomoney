@@ -1,12 +1,18 @@
 {{define "templates_table"}}
 <table>
     <thead>
-        <td>A</td>
-        <td>B</td>
+        <th>Payee</th>
+        <th>Amount</th>
+        <th>Memo</th>
     </thead>
+    {{range .Accounts}}
+    {{range .Transactions}}
     <tr>
-        <td>A</td>
-        <td>B</td>
+        <td>{{.Payee}}</td>
+        <td>{{.Amount}}</td>
+        <td>{{.Memo}}</td>
     </tr>
+    {{end}}
+    {{end}}
 </table>
 {{end}}
