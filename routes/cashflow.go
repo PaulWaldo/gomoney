@@ -27,6 +27,7 @@ func (controller Controller) cashFlowRedirectHandler(c *gin.Context) {
 }
 
 func (controller Controller) AddCashFlowRoutes() {
+	controller.router.LoadHTMLGlob("templates/*")
 	controller.router.GET(cashflowURL, controller.cashFlowHandler)
 	controller.router.GET("/", controller.cashFlowRedirectHandler)
 	controller.router.GET("/index.html", controller.cashFlowRedirectHandler)
