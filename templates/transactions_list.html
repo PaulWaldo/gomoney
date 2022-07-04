@@ -1,4 +1,11 @@
-{{define "templates_table"}}
+{{define "templates_table"}} {{/*
+<h1>Variables</h1>
+<ul>
+    {{range $index, $element := .}}
+    <li>{{$index}}={{$element}}</li>
+    {{end}}
+</ul>
+*/}}
 <div class="table-responsive">
     <table class="table table-striped table-bordered">
         <thead class="thead-dark">
@@ -6,15 +13,13 @@
             <th>Amount</th>
             <th>Memo</th>
         </thead>
-        {{range .Accounts}}
-        {{range .Transactions}}
+        {{range .Accounts}} {{range .Transactions}}
         <tr>
             <td>{{.Payee}}</td>
             <td>{{.Amount}}</td>
             <td>{{.Memo}}</td>
         </tr>
-        {{end}}
-        {{end}}
+        {{end}} {{end}}
     </table>
 </div>
 {{end}}

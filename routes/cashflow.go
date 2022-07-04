@@ -16,9 +16,10 @@ func (controller Controller) cashFlowAllAccountsHandler(c *gin.Context) {
 		status = http.StatusInternalServerError
 	}
 	c.HTML(status, "base.html", gin.H{
-		"PageTitle": "MoneyMinder - Cashflow",
-		"Error":     err,
-		"Accounts":  accounts,
+		"PageTitle":         "MoneyMinder - Cashflow",
+		"Error":             err,
+		"Accounts":          accounts,
+		"SelectedAccountID": 0,
 	})
 }
 
@@ -28,9 +29,10 @@ func (controller Controller) cashFlowSpecificAccountsHandler(c *gin.Context) {
 	accountId, err := strconv.ParseUint(accountIdParam, 10, 32)
 	if err != nil {
 		c.HTML(status, "base.html", gin.H{
-			"PageTitle": "MoneyMinder - Cashflow",
-			"Error":     err,
-			"Accounts":  []models.Account{},
+			"PageTitle":         "MoneyMinder - Cashflow",
+			"Error":             err,
+			"Accounts":          []models.Account{},
+			"SelectedAccountID": accountId,
 		})
 	}
 	fmt.Println(accountId)
@@ -39,9 +41,10 @@ func (controller Controller) cashFlowSpecificAccountsHandler(c *gin.Context) {
 		status = http.StatusInternalServerError
 	}
 	c.HTML(status, "base.html", gin.H{
-		"PageTitle": "MoneyMinder - Cashflow",
-		"Error":     err,
-		"Accounts":  []models.Account{account},
+		"PageTitle":         "MoneyMinder - Cashflow",
+		"Error":             err,
+		"Accounts":          []models.Account{account},
+		"SelectedAccountID": accountId,
 	})
 }
 
