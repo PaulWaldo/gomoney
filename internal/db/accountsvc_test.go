@@ -85,8 +85,8 @@ func Test_accountSvc_Get(t *testing.T) {
 			t.Fatalf("accountSvc.Get() error = '%v'", err)
 		}
 		if i == 0 {
-			if len(d.account.Transactions) != 1 {
-				t.Errorf("Expecting 1 transaction for first item, got %d", len(d.account.Transactions))
+			if len(got.Transactions) != 1 {
+				t.Errorf("Expecting 1 transaction for first item, got %d", len(got.Transactions))
 			}
 		}
 		if got.ID != d.generatedId {

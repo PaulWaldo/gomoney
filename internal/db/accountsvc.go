@@ -21,7 +21,7 @@ func (as accountSvc) Create(account *models.Account) error {
 
 func (as accountSvc) Get(id uint) (models.Account, error) {
 	var acct models.Account
-	res := as.db.First(&acct, id)
+	res := as.db.Preload("Transactions").First(&acct, id)
 	return acct, res.Error
 }
 
