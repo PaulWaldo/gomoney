@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gorm.io/gorm"
 
 	"github.com/PaulWaldo/gomoney/mocks"
 	"github.com/PaulWaldo/gomoney/pkg/domain"
@@ -22,11 +23,12 @@ func TestController_AddCashFlowRoutes(t *testing.T) {
 	}
 	type args struct{ url string }
 	tests := []struct {
-		name           string
-		fields         fields
-		args           args
-		wantStatusCode int
-		wantSubstrings []string
+		name               string
+		fields             fields
+		args               args
+		wantStatusCode     int
+		wantSubstrings     []string
+		dontWantSubstrings []string
 	}{
 		{
 			name: "Account is displayed",
@@ -47,6 +49,42 @@ func TestController_AddCashFlowRoutes(t *testing.T) {
 			wantSubstrings: []string{"xyzzy", "Tardis"},
 		},
 		{
+			name: "Only specified account's transactions",
+			fields: fields{
+				router: gin.Default(),
+				services: &domain.Services{
+					Account: mocks.AccountSvc{
+						GetAccountResp: models.Account{
+							Name: "xyzzy",
+							Transactions: []models.Transaction{
+								{Payee: "expected payee 1"},
+							},
+						},
+						ListAccountErr: nil,
+					},
+				},
+			},
+			args:               args{url: "/cashflow/1"},
+			wantStatusCode:     http.StatusOK,
+			wantSubstrings:     []string{"expected payee 1"},
+			dontWantSubstrings: []string{},
+		},
+		{
+			name: "Requesting unavailable account",
+			fields: fields{
+				router: gin.Default(),
+				services: &domain.Services{
+					Account: mocks.AccountSvc{
+						GetAccountErr: gorm.ErrRecordNotFound,
+					},
+				},
+			},
+			args:               args{url: "/cashflow/666"},
+			wantStatusCode:     http.StatusInternalServerError,
+			wantSubstrings:     []string{},
+			dontWantSubstrings: []string{},
+		},
+		{
 			name: "Database error gives Internal Server Error",
 			fields: fields{
 				router: gin.Default(),
@@ -62,7 +100,7 @@ func TestController_AddCashFlowRoutes(t *testing.T) {
 			wantSubstrings: []string{},
 		},
 		{
-			name: "/ redirects to cashflow",
+			name: "root redirects to cashflow",
 			fields: fields{
 				router: gin.Default(),
 				services: &domain.Services{
@@ -77,7 +115,7 @@ func TestController_AddCashFlowRoutes(t *testing.T) {
 			wantSubstrings: []string{},
 		},
 		{
-			name: "/index.html redirects to cashflow",
+			name: "index.html redirects to cashflow",
 			fields: fields{
 				router: gin.Default(),
 				services: &domain.Services{
@@ -107,6 +145,9 @@ func TestController_AddCashFlowRoutes(t *testing.T) {
 			require.Equal(t, tt.wantStatusCode, w.Code, "expecting response code %d, got %d", tt.wantStatusCode, w.Code)
 			for _, sub := range tt.wantSubstrings {
 				assert.Contains(t, w.Body.String(), sub)
+			}
+			for _, sub := range tt.dontWantSubstrings {
+				assert.NotContains(t, w.Body.String(), sub)
 			}
 		})
 	}
