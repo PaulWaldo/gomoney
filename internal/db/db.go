@@ -1,6 +1,8 @@
 package db
 
 import (
+	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/PaulWaldo/gomoney/pkg/domain"
@@ -19,7 +21,38 @@ func connectToDatabase(dsn string, gormConfig *gorm.Config) (*gorm.DB, error) {
 	return db, nil
 }
 
-func populateDatabase(services domain.Services) error {
+func populateDatabaseLarge(services domain.Services) error {
+	const numModels = 20
+	const numTransactions = 1000
+	now := time.Now()
+	day := 24 * time.Hour
+
+	as := services.Account
+	// accounts := make([]models.Account, numModels)
+	for i := 0; i < numModels; i++ {
+		transactions := make([]models.Transaction, numTransactions)
+		for j := 0; j < numTransactions; j++ {
+			transactions[j] = models.Transaction{
+				Payee:  fmt.Sprintf("Transaction %d, Account %d", j+1, i+1),
+				Type:   "W",
+				Amount: float64(rand.Float32()) * 10000,
+				Memo:   fmt.Sprintf("For stuff %d", j+1),
+				Date:   now.Add(time.Duration(-(rand.Int31n(200))) * day),
+			}
+		}
+		account := models.Account{
+			Name:         fmt.Sprintf("Account %d", i+1),
+			Type:         models.Checking.Slug,
+			Transactions: transactions,
+		}
+		if err := as.Create(&account); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func populateDatabaseSmall(services domain.Services) error {
 	as := services.Account
 	var err error
 	now := time.Now()
@@ -84,7 +117,7 @@ func NewSqliteInMemoryServices(gormConfig *gorm.Config, createDummyData bool) (*
 	}
 	s := &domain.Services{Account: NewAccountSvc(db), Transaction: NewTransactionSvc(db)}
 	if createDummyData {
-		err = populateDatabase(*s)
+		err = populateDatabaseLarge(*s)
 		if err != nil {
 			return nil, nil, err
 		}
