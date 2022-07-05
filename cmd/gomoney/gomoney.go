@@ -13,6 +13,7 @@ func main() {
 	gin.SetMode(gin.DebugMode)
 	r := gin.Default()
 
+	r.Static("/myjs", "js")
 	r.Static("/static", "node_modules/startbootstrap-sb-admin-2")
 	services, _, err := db.NewSqliteInMemoryServices(&gorm.Config{}, true)
 	if err != nil {
