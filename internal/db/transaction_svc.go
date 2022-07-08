@@ -26,7 +26,9 @@ func (ts transactionSvc) Get(id uint) (models.Transaction, error) {
 }
 
 func (ts transactionSvc) List() ([]models.Transaction, error) {
-	return []models.Transaction{}, nil
+	var txs []models.Transaction
+	err := ts.db.Find(&txs).Error
+	return txs, err
 }
 
 // func (ts transactionSvc) AddTransactions(a models.Account, transactions []models.Transaction) error {

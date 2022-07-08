@@ -5,36 +5,11 @@ import (
 	"time"
 
 	"github.com/PaulWaldo/gomoney/pkg/domain/models"
+	"github.com/stretchr/testify/require"
 )
 
-// func TestNewTransactionSvc(t *testing.T) {
-// 	type args struct {
-// 		db *gorm.DB
-// 	}
-// 	tests := []struct {
-// 		name string
-// 		args args
-// 		want domain.TransactionSvc
-// 	}{
-// 		{
-// 			name: "New service stores database",
-// 			args: args{db: &gorm.DB{}},
-// 			want: domain.TransactionSvc{},
-// 		},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			if got := NewTransactionSvc(tt.args.db); !reflect.DeepEqual(got, tt.want) {
-// 				t.Errorf("NewTransactionSvc() = %v, want %v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }
-
 func Test_transactionSvc_Create(t *testing.T) {
-	type fields struct {
-		// db *gorm.DB
-	}
+	type fields struct{}
 	type args struct {
 		transaction *models.Transaction
 	}
@@ -133,35 +108,42 @@ func Test_transactionSvc_Get(t *testing.T) {
 	}
 }
 
-// func Test_transactionSvc_Get(t *testing.T) {
-// 	type fields struct {
-// 		db *gorm.DB
-// 	}
-// 	type args struct {
-// 		id uint
-// 	}
-// 	tests := []struct {
-// 		name    string
-// 		fields  fields
-// 		args    args
-// 		want    *models.Transaction
-// 		wantErr bool
-// 	}{
-// 		// TODO: Add test cases.
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			ts := transactionSvc{
-// 				db: tt.fields.db,
-// 			}
-// 			got, err := ts.Get(tt.args.id)
-// 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("transactionSvc.Get() error = %v, wantErr %v", err, tt.wantErr)
-// 				return
-// 			}
-// 			if !reflect.DeepEqual(got, tt.want) {
-// 				t.Errorf("transactionSvc.Get() = %v, want %v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+func Test_transactionSvc_List(t *testing.T) {
+	type fields struct{}
+	type initialState []models.Transaction
+	tests := []struct {
+		name    string
+		fields  fields
+		toAdd   initialState
+		want    []models.Transaction
+		wantErr bool
+	}{
+		{
+			toAdd:   initialState{{Payee: "p1"}, {Payee: "p2"}},
+			want:    []models.Transaction{{Payee: "p1"}, {Payee: "p2"}},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			teardownTest, tx := setupTest(t, db)
+			defer teardownTest(t)
+			err := tx.Create(tt.toAdd).Error
+			require.NoErrorf(t, err, "got error creating initial data: %s", err)
+
+			ts := transactionSvc{
+				db: tx,
+			}
+			got, err := ts.List()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("transactionSvc.List() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			require.Equal(t, len(tt.want), len(got), "expecting %d elements, got %d", len(tt.want), len(got))
+			for i := range got {
+				require.Equal(t, tt.want[i].Payee, got[i].Payee, "expecting payee %s, but got %s", tt.want[i].Payee, got[i].Payee)
+			}
+		})
+	}
+}
