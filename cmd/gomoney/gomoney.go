@@ -20,9 +20,7 @@ func main() {
 		panic(err)
 	}
 
-	controller := routes.NewController(r, services)
-
-	controller.AddCashFlowRoutes()
+	routes.NewController(r, services).AddCashFlowRoutes()
 
 	log.Print("Starting server on port 8080")
 	r.Run(":8080")
