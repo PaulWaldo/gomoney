@@ -77,7 +77,7 @@ func (controller Controller) AddCashFlowRoutes() {
 	controller.router.LoadHTMLGlob("templates/*")
 	group := controller.router.Group("/cashflow")
 	{
-		group.GET("/", controller.cashFlowAllAccountsHandler)
+		group.GET("", controller.cashFlowAllAccountsHandler)
 		group.GET("/:accountId", controller.cashFlowAllAccountsHandler)
 	}
 	controller.router.GET("/", controller.cashFlowRedirectHandler)
