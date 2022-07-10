@@ -9,19 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type paginatedTransactionList struct {
+	// Data:
+
+}
+
 func jSONWithPagination(c *gin.Context, statusCode int, response utils.PaginatedResponse) {
 	limit, _ := c.MustGet(constants.Limit).(int64)
 	size, _ := c.MustGet(constants.Page).(int64)
+	response.HasNext = (response.Count - limit*size) > 0
 
-	c.JSON(
-		statusCode,
-		gin.H{
-			"data": response.Data,
-			"pagination": gin.H{
-				"has_next": (response.Count - limit*size) > 0,
-				"count":    response.Count,
-			},
-		})
+	c.JSON(statusCode, response)
 }
 
 func (controller Controller) transactionsListHandler(c *gin.Context) {

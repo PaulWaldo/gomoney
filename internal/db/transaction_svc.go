@@ -47,7 +47,7 @@ func (ts transactionSvc) List() (utils.PaginatedResponse, error) {
 	}
 	var count int64
 	err := paginatedDb.Find(&txs).Offset(-1).Limit(-1).Count(&count).Error
-	return utils.PaginatedResponse{Data: convertTransactionsToAny(txs), Count: count}, err
+	return utils.PaginatedResponse{Data: txs, Count: count}, err
 }
 
 // func (ts transactionSvc) AddTransactions(a models.Account, transactions []models.Transaction) error {

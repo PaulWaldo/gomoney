@@ -15,6 +15,7 @@ import (
 	"github.com/PaulWaldo/gomoney/constants"
 	"github.com/PaulWaldo/gomoney/internal/db"
 	"github.com/PaulWaldo/gomoney/pkg/domain/models"
+	"github.com/PaulWaldo/gomoney/utils"
 )
 
 func TestController_AddTransactionRoutes(t *testing.T) {
@@ -39,15 +40,18 @@ func TestController_AddTransactionRoutes(t *testing.T) {
 	t.Logf("response body=%s", w.Body.String())
 
 	// Convert JSON to map
-	var response []map[string]interface{}
-	// err = json.NewEncoder(w.Body).Encode(response)
-	err = json.Unmarshal([]byte(w.Body.Bytes()), &response)
+	var response utils.PaginatedResponse
+	err = json.NewEncoder(w.Body).Encode(&response)
+	// fmt.Printf("Transaction body: %s", w.Body.String())
+	// err = json.Unmarshal([]byte(w.Body.Bytes()), &response)
 	require.NoErrorf(t, err, "Got error encoding response: %s", err)
 	t.Logf("response=%v", response)
 
+	data := response.Data
+	require.Lenf(t, data, len(transactions), "expecting returned transaction length to be %d, but was %d", len(transactions), len(data))
 	for i := range transactions {
-		assert.Equal(t, transactions[i].Payee, response[i]["Payee"],
+		assert.Equal(t, transactions[i].Payee, data[i].Payee,
 			"expecting element %d's payee to be %s, but got %s",
-			transactions[i].Payee, response[i]["Payee"])
+			transactions[i].Payee, data[i].Payee)
 	}
 }
