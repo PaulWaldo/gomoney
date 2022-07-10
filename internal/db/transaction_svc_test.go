@@ -1,10 +1,12 @@
 package db
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/PaulWaldo/gomoney/pkg/domain/models"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -108,42 +110,63 @@ func Test_transactionSvc_Get(t *testing.T) {
 	}
 }
 
-func Test_transactionSvc_List(t *testing.T) {
-	type fields struct{}
-	type initialState []models.Transaction
-	tests := []struct {
-		name    string
-		fields  fields
-		toAdd   initialState
-		want    []models.Transaction
-		wantErr bool
-	}{
-		{
-			toAdd:   initialState{{Payee: "p1"}, {Payee: "p2"}},
-			want:    []models.Transaction{{Payee: "p1"}, {Payee: "p2"}},
-			wantErr: false,
-		},
+func TestList(t *testing.T) {
+	teardownTest, tx := setupTest(t, db)
+	defer teardownTest(t)
+	const numTxs = 10
+	toAdd := make([]models.Transaction, numTxs)
+	for i := 0; i < numTxs; i++ {
+		toAdd[i] = models.Transaction{Payee: fmt.Sprintf("Payee %d", i)}
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			teardownTest, tx := setupTest(t, db)
-			defer teardownTest(t)
-			err := tx.Create(tt.toAdd).Error
-			require.NoErrorf(t, err, "got error creating initial data: %s", err)
+	err := tx.Create(toAdd).Error
+	require.NoErrorf(t, err, "got error creating initial data: %s", err)
 
-			ts := transactionSvc{
-				db: tx,
-			}
-			got, err := ts.List()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("transactionSvc.List() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-
-			require.Equal(t, len(tt.want), len(got), "expecting %d elements, got %d", len(tt.want), len(got))
-			for i := range got {
-				require.Equal(t, tt.want[i].Payee, got[i].Payee, "expecting payee %s, but got %s", tt.want[i].Payee, got[i].Payee)
-			}
-		})
-	}
+	svc := NewTransactionSvc(tx)
+	// svc.SetPaginationScope(scope func(*gorm.DB) *gorm.DB)
+	resp, err := svc.List()
+	require.NoErrorf(t, err, "got error callint List: %s", err)
+	require.NotNil(t, resp, "List response is nil")
+	assert.EqualValues(t, numTxs, resp.Count, "expecting Count to be %d but got %d", numTxs, resp.Count)
+	assert.Equal(t, numTxs, len(resp.Data), "expecting num Data items to be %d but got %d", numTxs, len(resp.Data))
 }
+
+// func Test_transactionSvc_List(t *testing.T) {
+// 	type fields struct{}
+// 	type initialState []models.Transaction
+// 	tests := []struct {
+// 		name    string
+// 		fields  fields
+// 		toAdd   initialState
+// 		want    []models.Transaction
+// 		wantErr bool
+// 	}{
+// 		{
+// 			name:    "list all in database",
+// 			toAdd:   initialState{{Payee: "p1"}, {Payee: "p2"}},
+// 			want:    []models.Transaction{{Payee: "p1"}, {Payee: "p2"}},
+// 			wantErr: false,
+// 		},
+// 	}
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			teardownTest, tx := setupTest(t, db)
+// 			defer teardownTest(t)
+// 			err := tx.Create(tt.toAdd).Error
+// 			require.NoErrorf(t, err, "got error creating initial data: %s", err)
+
+// 			ts := transactionSvc{
+// 				db: tx,
+// 			}
+// 			got, err := ts.List()
+// 			if (err != nil) != tt.wantErr {
+// 				t.Errorf("transactionSvc.List() error = %v, wantErr %v", err, tt.wantErr)
+// 				return
+// 			}
+
+// 			require.Equal(t, len(tt.want), len(got), "expecting %d elements, got %d", len(tt.want), len(got))
+// 			for i := range got {
+// 				require.Equal(t, tt.want[i].Payee, got[i].Payee, "expecting payee %s, but got %s", tt.want[i].Payee, got[i].Payee)
+// 			}
+// 		})
+// 	}
+// }

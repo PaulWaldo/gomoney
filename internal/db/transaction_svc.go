@@ -3,15 +3,21 @@ package db
 import (
 	"github.com/PaulWaldo/gomoney/pkg/domain"
 	"github.com/PaulWaldo/gomoney/pkg/domain/models"
+	"github.com/PaulWaldo/gomoney/utils"
 	"gorm.io/gorm"
 )
 
 type transactionSvc struct {
-	db *gorm.DB
+	paginationScope func(*gorm.DB) *gorm.DB
+	db              *gorm.DB
 }
 
 func NewTransactionSvc(db *gorm.DB) domain.TransactionSvc {
 	return transactionSvc{db: db}
+}
+
+func (ts transactionSvc) SetPaginationScope(scope func(*gorm.DB) *gorm.DB) {
+	ts.paginationScope = scope
 }
 
 func (ts transactionSvc) Create(transaction *models.Transaction) error {
@@ -25,10 +31,23 @@ func (ts transactionSvc) Get(id uint) (models.Transaction, error) {
 	return t, res.Error
 }
 
-func (ts transactionSvc) List() ([]models.Transaction, error) {
+func convertTransactionsToAny(t []models.Transaction) []interface{} {
+	a := make([]interface{}, len(t))
+	for i, v := range t {
+		a[i] = v
+	}
+	return a
+}
+
+func (ts transactionSvc) List() (utils.PaginatedResponse, error) {
 	var txs []models.Transaction
-	err := ts.db.Find(&txs).Error
-	return txs, err
+	paginatedDb := ts.db
+	if ts.paginationScope != nil {
+		paginatedDb = ts.db.Scopes(ts.paginationScope)
+	}
+	var count int64
+	err := paginatedDb.Find(&txs).Offset(-1).Limit(-1).Count(&count).Error
+	return utils.PaginatedResponse{Data: convertTransactionsToAny(txs), Count: count}, err
 }
 
 // func (ts transactionSvc) AddTransactions(a models.Account, transactions []models.Transaction) error {

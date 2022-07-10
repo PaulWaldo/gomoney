@@ -1,3 +1,6 @@
 $(document).ready(function () {
-  $("#transactions").DataTable();
-});
+  $("#transactions").DataTable({
+  "serverSide":true,
+  "ajax":"/transactions"
+  });
+})

@@ -1,14 +1,11 @@
-{{define "templates_table"}}
-{{/*
+{{define "templates_table"}} {{/*
 <h1>Variables</h1>
 <ul>
     {{range $index, $element := .}}
     <li>{{$index}}={{$element}}</li>
     {{end}}
 </ul>
-*/}}
-
-{{- $selectedAccountId := .SelectedAccountID -}}
+*/}} {{- $selectedAccountId := .SelectedAccountID -}}
 <div class="table-responsive">
     <table class="table table-striped table-bordered" id="transactions">
         <thead class="thead-dark">
@@ -17,18 +14,15 @@
             <th>Memo</th>
             <th>Date</th>
         </thead>
-        {{range .Accounts}}
-            {{if or (eq $selectedAccountId 0) (eq $selectedAccountId .ID)}}
-                {{range .Transactions}}
-                <tr>
-                    <td>{{.Payee}}</td>
-                    <td>{{.Amount}}</td>
-                    <td>{{.Memo}}</td>
-                    <td>{{.Date}}</td>
-                </tr>
-                {{end}}
-            {{end}}
-        {{end}}
+        {{/* {{range .Accounts}} {{if or (eq $selectedAccountId 0) (eq
+        $selectedAccountId .ID)}} {{range .Transactions}}
+        <tr>
+            <td>{{.Payee}}</td>
+            <td>{{.Amount}}</td>
+            <td>{{.Memo}}</td>
+            <td>{{.Date}}</td>
+        </tr>
+        {{end}} {{end}} {{end}} */}}
     </table>
 </div>
 {{end}}
