@@ -29,9 +29,15 @@ func (controller Controller) cashFlowAllAccountsHandler(c *gin.Context) {
 		}
 	}
 
+	accounts, err := controller.services.Account.List()
+	if err != nil {
+		controller.returnError(c, err)
+	}
+
 	c.HTML(status, "base.html", gin.H{
-		"PageTitle": "MoneyMinder - Cashflow",
-		"Error":     nil,
+		"PageTitle":         "MoneyMinder - Cashflow",
+		"Error":             nil,
+		"Accounts":          accounts,
 		"SelectedAccountID": accountId,
 	})
 }
