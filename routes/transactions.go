@@ -19,10 +19,11 @@ func jSONWithPagination(c *gin.Context, statusCode int, response utils.Paginated
 
 func (controller Controller) transactionsListHandler(c *gin.Context) {
 	controller.services.Transaction.SetPaginationScope(utils.Paginate(c))
-	response, err := controller.services.Transaction.List()
+	txns, count, err := controller.services.Transaction.List()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
 	}
+	response := utils.PaginatedResponse{Data: txns, Count: count}
 	jSONWithPagination(c, http.StatusOK, response)
 }
 

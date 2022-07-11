@@ -3,7 +3,6 @@ package db
 import (
 	"github.com/PaulWaldo/gomoney/pkg/domain"
 	"github.com/PaulWaldo/gomoney/pkg/domain/models"
-	"github.com/PaulWaldo/gomoney/utils"
 	"gorm.io/gorm"
 )
 
@@ -39,7 +38,7 @@ func (ts transactionSvc) Get(id uint) (models.Transaction, error) {
 // 	return a
 // }
 
-func (ts transactionSvc) List() (utils.PaginatedResponse, error) {
+func (ts transactionSvc) List() ([]models.Transaction, int64, error) {
 	var txs []models.Transaction
 	paginatedDb := ts.db
 	if ts.paginationScope != nil {
@@ -47,7 +46,7 @@ func (ts transactionSvc) List() (utils.PaginatedResponse, error) {
 	}
 	var count int64
 	err := paginatedDb.Find(&txs).Offset(-1).Limit(-1).Count(&count).Error
-	return utils.PaginatedResponse{Data: txs, Count: count}, err
+	return txs, count, err
 }
 
 // func (ts transactionSvc) AddTransactions(a models.Account, transactions []models.Transaction) error {

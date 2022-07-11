@@ -123,11 +123,11 @@ func TestList(t *testing.T) {
 
 	svc := NewTransactionSvc(tx)
 	// svc.SetPaginationScope(scope func(*gorm.DB) *gorm.DB)
-	resp, err := svc.List()
+	txns, count, err := svc.List()
 	require.NoErrorf(t, err, "got error callint List: %s", err)
-	require.NotNil(t, resp, "List response is nil")
-	assert.EqualValues(t, numTxs, resp.Count, "expecting Count to be %d but got %d", numTxs, resp.Count)
-	assert.Equal(t, numTxs, len(resp.Data), "expecting num Data items to be %d but got %d", numTxs, len(resp.Data))
+	require.NotNil(t, txns, "List response is nil")
+	assert.EqualValues(t, numTxs, count, "expecting Count to be %d but got %d", numTxs, count)
+	assert.Equal(t, numTxs, len(txns), "expecting num Data items to be %d but got %d", numTxs, len(txns))
 }
 
 // func Test_transactionSvc_List(t *testing.T) {
