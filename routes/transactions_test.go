@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,7 +24,12 @@ func TestController_AddTransactionRoutes(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	var transactions = []models.Transaction{{Payee: "p1"}, {Payee: "p2"}}
+
+	const numItems = 10
+	transactions := make([]models.Transaction, numItems)
+	for i := 0; i < numItems; i++ {
+		transactions[i] = models.Transaction{Payee: fmt.Sprintf("Payee %d", i)}
+	}
 	err = db.Create(&transactions).Error
 	require.NoError(t, err, "error creating transactions: %s", err)
 
@@ -39,13 +45,10 @@ func TestController_AddTransactionRoutes(t *testing.T) {
 	require.Equal(t, http.StatusOK, w.Code, "expecting response code %d, got %d", http.StatusInternalServerError, w.Code)
 	t.Logf("response body=%s", w.Body.String())
 
-	// Convert JSON to map
 	var response utils.PaginatedResponse
-	err = json.NewEncoder(w.Body).Encode(&response)
-	// fmt.Printf("Transaction body: %s", w.Body.String())
-	// err = json.Unmarshal([]byte(w.Body.Bytes()), &response)
+	err = json.NewDecoder(w.Body).Decode(&response)
 	require.NoErrorf(t, err, "Got error encoding response: %s", err)
-	t.Logf("response=%v", response)
+	t.Logf("converted response=%v", response)
 
 	data := response.Data
 	require.Lenf(t, data, len(transactions), "expecting returned transaction length to be %d, but was %d", len(transactions), len(data))
@@ -54,4 +57,7 @@ func TestController_AddTransactionRoutes(t *testing.T) {
 			"expecting element %d's payee to be %s, but got %s",
 			transactions[i].Payee, data[i].Payee)
 	}
+
+	count := response.Count
+	assert.EqualValuesf(t, len(data), count, "expecting response.count to be %d, but got %d", len(data), count)
 }

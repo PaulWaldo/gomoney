@@ -13,14 +13,14 @@ type transactionSvc struct {
 }
 
 func NewTransactionSvc(db *gorm.DB) domain.TransactionSvc {
-	return transactionSvc{db: db}
+	return &transactionSvc{db: db}
 }
 
-func (ts transactionSvc) SetPaginationScope(scope func(*gorm.DB) *gorm.DB) {
+func (ts *transactionSvc) SetPaginationScope(scope func(*gorm.DB) *gorm.DB) {
 	ts.paginationScope = scope
 }
 
-func (ts transactionSvc) Create(transaction *models.Transaction) error {
+func (ts *transactionSvc) Create(transaction *models.Transaction) error {
 	res := ts.db.Create(&transaction)
 	return res.Error
 }
@@ -31,13 +31,13 @@ func (ts transactionSvc) Get(id uint) (models.Transaction, error) {
 	return t, res.Error
 }
 
-func convertTransactionsToAny(t []models.Transaction) []interface{} {
-	a := make([]interface{}, len(t))
-	for i, v := range t {
-		a[i] = v
-	}
-	return a
-}
+// func convertTransactionsToAny(t []models.Transaction) []interface{} {
+// 	a := make([]interface{}, len(t))
+// 	for i, v := range t {
+// 		a[i] = v
+// 	}
+// 	return a
+// }
 
 func (ts transactionSvc) List() (utils.PaginatedResponse, error) {
 	var txs []models.Transaction
