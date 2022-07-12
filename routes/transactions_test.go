@@ -25,7 +25,10 @@ func TestController_AddTransactionRoutes(t *testing.T) {
 		panic(err)
 	}
 
-	const numItems = 10
+	const (
+		numItems = 20
+		pageSize = 7
+	)
 	transactions := make([]models.Transaction, numItems)
 	for i := 0; i < numItems; i++ {
 		transactions[i] = models.Transaction{Payee: fmt.Sprintf("Payee %d", i)}
@@ -40,6 +43,10 @@ func TestController_AddTransactionRoutes(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, constants.TransactionsURL, nil)
 	require.NoErrorf(t, err, "Got error creating request: %s", err)
+	values := req.URL.Query()
+	values.Add("per_page", fmt.Sprintf("%d", pageSize))
+	values.Add("page", "1")
+	req.URL.RawQuery = values.Encode()
 	controller.router.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusOK, w.Code, "expecting response code %d, got %d", http.StatusInternalServerError, w.Code)
@@ -51,13 +58,13 @@ func TestController_AddTransactionRoutes(t *testing.T) {
 	t.Logf("converted response=%v", response)
 
 	data := response.Data
-	require.Lenf(t, data, len(transactions), "expecting returned transaction length to be %d, but was %d", len(transactions), len(data))
-	for i := range transactions {
-		assert.Equal(t, transactions[i].Payee, data[i].Payee,
+	require.Lenf(t, data, pageSize, "expecting returned transaction length to be %d, but was %d", pageSize, len(data))
+	for i, gotTx := range data {
+		assert.Equal(t, transactions[gotTx.ID-1].Payee, data[i].Payee,
 			"expecting element %d's payee to be %s, but got %s",
 			transactions[i].Payee, data[i].Payee)
 	}
 
 	count := response.Count
-	assert.EqualValuesf(t, len(data), count, "expecting response.count to be %d, but got %d", len(data), count)
+	assert.EqualValuesf(t, numItems, count, "expecting response.count to be %d, but got %d", numItems, count)
 }
