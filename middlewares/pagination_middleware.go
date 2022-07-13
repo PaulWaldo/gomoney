@@ -3,6 +3,7 @@ package middlewares
 import (
 	// "clean-architecture/constants"
 	// "clean-architecture/lib"
+	"fmt"
 	"log"
 	"strconv"
 
@@ -22,19 +23,25 @@ func NewPaginationMiddleware(logger log.Logger) PaginationMiddleware {
 func /*(p PaginationMiddleware)*/ Paginator() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// p.logger.Output("setting up pagination middleware")
+		// fmt.Println("********* Query Params *************")
+		// for k, v := range c.Request.URL.Query() {
+		// 	fmt.Printf("%s = %s\n", k, v)
+		// }
 
-		perPage, err := strconv.ParseInt(c.Query("per_page"), 10, 0)
+		// Designed to handle parameters as sent by DataTables
+		// https://datatables.net/manual/server-side#Sent-parameters
+		perPage, err := strconv.ParseInt(c.Query("length"), 10, 0)
 		if err != nil {
 			perPage = 10
 		}
 
-		page, err := strconv.ParseInt(c.Query("page"), 10, 0)
+		offset, err := strconv.ParseInt(c.Query("start"), 10, 0)
 		if err != nil {
-			page = 0
+			offset = 0
 		}
 
 		c.Set(constants.Limit, perPage)
-		c.Set(constants.Page, page)
+		c.Set(constants.Offset, offset)
 
 		c.Next()
 	}
