@@ -1,8 +1,6 @@
 package middlewares
 
 import (
-	// "clean-architecture/constants"
-	// "clean-architecture/lib"
 	"fmt"
 	"log"
 	"strconv"
@@ -20,13 +18,13 @@ func NewPaginationMiddleware(logger log.Logger) PaginationMiddleware {
 	return PaginationMiddleware{logger: logger}
 }
 
-func /*(p PaginationMiddleware)*/ Paginator() gin.HandlerFunc {
+func Paginator() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// p.logger.Output("setting up pagination middleware")
-		// fmt.Println("********* Query Params *************")
-		// for k, v := range c.Request.URL.Query() {
-		// 	fmt.Printf("%s = %s\n", k, v)
-		// }
+		fmt.Println("********* Query Params *************")
+		for k, v := range c.Request.URL.Query() {
+			fmt.Printf("%s = %s\n", k, v)
+		}
 
 		// Designed to handle parameters as sent by DataTables
 		// https://datatables.net/manual/server-side#Sent-parameters

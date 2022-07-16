@@ -1,21 +1,31 @@
 package domain
 
 import (
-	"github.com/PaulWaldo/gomoney/pkg/domain/models"
+	"time"
+
 	"gorm.io/gorm"
 )
 
 type AccountSvc interface {
-	Create(account *models.Account) error
-	Get(id uint) (models.Account, error)
-	List() ([]models.Account, error)
-	AddTransactions(a models.Account, t []models.Transaction) error
+	Create(account *Account) error
+	Get(id uint) (Account, error)
+	List() ([]Account, error)
+	AddTransactions(a Account, t []Transaction) error
+}
+
+type Transaction struct {
+	Payee     string    `json:"payee,omitempty"`
+	Type      string    `json:"type,omitempty"`
+	Amount    float64   `json:"amount,omitempty"`
+	Memo      string    `json:"memo,omitempty"`
+	Date      time.Time `json:"date,omitempty"`
+	AccountID uint      `json:"account_id,omitempty"`
 }
 
 type TransactionSvc interface {
-	Create(transaction *models.Transaction) error
-	Get(id uint) (models.Transaction, error)
-	List() ([]models.Transaction, int64, error)
+	Create(transaction *Transaction) error
+	Get(id uint) (Transaction, error)
+	List() ([]Transaction, int64, error)
 	SetPaginationScope(scope func(*gorm.DB) *gorm.DB)
 }
 

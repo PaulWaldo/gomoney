@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/PaulWaldo/gomoney/pkg/domain"
-	"github.com/PaulWaldo/gomoney/pkg/domain/models"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -17,7 +16,7 @@ func connectToDatabase(dsn string, gormConfig *gorm.Config) (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	db.AutoMigrate(&models.Account{}, &models.Transaction{})
+	db.AutoMigrate(&domain.Account{}, &domain.Transaction{})
 	return db, nil
 }
 
@@ -28,11 +27,11 @@ func populateDatabaseLarge(services domain.Services) error {
 	day := 24 * time.Hour
 
 	as := services.Account
-	// accounts := make([]models.Account, numModels)
+	// accounts := make([]Account, numModels)
 	for i := 0; i < numModels; i++ {
-		transactions := make([]models.Transaction, numTransactions)
+		transactions := make([]domain.Transaction, numTransactions)
 		for j := 0; j < numTransactions; j++ {
-			transactions[j] = models.Transaction{
+			transactions[j] = domain.Transaction{
 				Payee:  fmt.Sprintf("Transaction %d, Account %d", j+1, i+1),
 				Type:   "W",
 				Amount: float64(rand.Float32()) * 10000,
@@ -40,9 +39,9 @@ func populateDatabaseLarge(services domain.Services) error {
 				Date:   now.Add(time.Duration(-(rand.Int31n(200))) * day),
 			}
 		}
-		account := models.Account{
+		account := domain.Account{
 			Name:         fmt.Sprintf("Account %d", i+1),
-			Type:         models.Checking.Slug,
+			Type:         domain.Checking.Slug,
 			Transactions: transactions,
 		}
 		if err := as.Create(&account); err != nil {
@@ -57,10 +56,10 @@ func populateDatabaseSmall(services domain.Services) error {
 	var err error
 	now := time.Now()
 	day := 24 * time.Hour
-	err = as.Create(&models.Account{
+	err = as.Create(&domain.Account{
 		Name: "My Checking",
-		Type: models.Checking.Slug,
-		Transactions: []models.Transaction{
+		Type: domain.Checking.Slug,
+		Transactions: []domain.Transaction{
 			{
 				Payee:  "Grocery store",
 				Type:   "W",
@@ -80,10 +79,10 @@ func populateDatabaseSmall(services domain.Services) error {
 	if err != nil {
 		return err
 	}
-	err = as.Create(&models.Account{
+	err = as.Create(&domain.Account{
 		Name: "My Savings",
-		Type: models.Savings.Slug,
-		Transactions: []models.Transaction{
+		Type: domain.Savings.Slug,
+		Transactions: []domain.Transaction{
 			{
 				Payee:  "Me",
 				Type:   "D",
@@ -103,7 +102,7 @@ func populateDatabaseSmall(services domain.Services) error {
 	if err != nil {
 		return err
 	}
-	err = as.Create(&models.Account{Name: "My Credit Card", Type: models.CreditCard.Slug})
+	err = as.Create(&domain.Account{Name: "My Credit Card", Type: domain.CreditCard.Slug})
 	if err != nil {
 		return err
 	}
