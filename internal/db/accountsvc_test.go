@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/PaulWaldo/gomoney/pkg/domain/models"
+	"github.com/PaulWaldo/gomoney/pkg/domain"
 )
 
 func Test_accountSvc_Create(t *testing.T) {
@@ -15,7 +15,7 @@ func Test_accountSvc_Create(t *testing.T) {
 		// db *gorm.DB
 	}
 	type args struct {
-		account models.Account
+		account domain.Account
 	}
 	tests := []struct {
 		name    string
@@ -27,7 +27,7 @@ func Test_accountSvc_Create(t *testing.T) {
 		{
 			name:    "create success returns id",
 			fields:  fields{},
-			args:    args{account: models.Account{Name: "My Checking", Type: models.Checking.Slug}},
+			args:    args{account: domain.Account{Name: "My Checking", Type: domain.Checking.Slug}},
 			want:    1,
 			wantErr: false,
 		},
@@ -43,7 +43,7 @@ func Test_accountSvc_Create(t *testing.T) {
 				t.Fatalf("accountSvc.Create() error = '%v', wantErr %v", err, tt.wantErr)
 				return
 			}
-			var got models.Account
+			var got domain.Account
 			tx.First(&got, tt.args.account.ID)
 			if !(tt.args.account.ID == got.ID && tt.args.account.Name == got.Name && tt.args.account.Type == got.Type) {
 				t.Fatalf("accountSvc.Create() = \n%v\n, want \n%v\n", got, tt.args.account)
@@ -59,17 +59,17 @@ func Test_accountSvc_Get(t *testing.T) {
 	as := NewAccountSvc(tx)
 
 	type datum struct {
-		account     models.Account
+		account     domain.Account
 		generatedId uint
 	}
 	data := []datum{
-		{account: models.Account{
+		{account: domain.Account{
 			Name:         "a1",
-			Type:         models.Checking.Slug,
-			Transactions: []models.Transaction{{Payee: "p1"}},
+			Type:         domain.Checking.Slug,
+			Transactions: []domain.Transaction{{Payee: "p1"}},
 		}},
-		{account: models.Account{Name: "a2", Type: models.Savings.Slug}},
-		{account: models.Account{Name: "a3", Type: models.CreditCard.Slug}},
+		{account: domain.Account{Name: "a2", Type: domain.Savings.Slug}},
+		{account: domain.Account{Name: "a3", Type: domain.CreditCard.Slug}},
 	}
 
 	for i, d := range data {
@@ -108,13 +108,13 @@ func Test_accountSvc_List(t *testing.T) {
 	as := NewAccountSvc(tx)
 
 	type datum struct {
-		account     models.Account
+		account     domain.Account
 		generatedId uint
 	}
 	data := []datum{
-		{account: models.Account{Name: "a1", Type: models.Checking.Slug}},
-		{account: models.Account{Name: "a2", Type: models.Savings.Slug}},
-		{account: models.Account{Name: "a3", Type: models.CreditCard.Slug}},
+		{account: domain.Account{Name: "a1", Type: domain.Checking.Slug}},
+		{account: domain.Account{Name: "a2", Type: domain.Savings.Slug}},
+		{account: domain.Account{Name: "a3", Type: domain.CreditCard.Slug}},
 	}
 
 	for i, d := range data {
@@ -157,12 +157,12 @@ func Test_accountSvc_AddTransactions(t *testing.T) {
 	defer teardownTest(t)
 
 	as := NewAccountSvc(tx)
-	acct := models.Account{Name: "Account", Type: models.Checking.Slug}
+	acct := domain.Account{Name: "Account", Type: domain.Checking.Slug}
 	err := as.Create(&acct)
 	if err != nil {
 		t.Fatalf("Error creating account %s", err)
 	}
-	txns := []models.Transaction{
+	txns := []domain.Transaction{
 		{Payee: "Me", Type: "D", Amount: 1234.56, Memo: "For testing services", Date: time.Now()},
 		{Payee: "You", Type: "D", Amount: 1.23, Memo: "Tax", Date: time.Now()},
 	}
@@ -170,8 +170,8 @@ func Test_accountSvc_AddTransactions(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var gotAcct models.Account
-	err = tx.Model(&models.Account{}).Preload("Transactions").First(&gotAcct, acct.ID).Error
+	var gotAcct domain.Account
+	err = tx.Model(&domain.Account{}).Preload("Transactions").First(&gotAcct, acct.ID).Error
 	if err != nil {
 		t.Fatalf("Error getting updated account %s", err)
 	}
