@@ -26,7 +26,6 @@ func (controller Controller) transactionsListHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, err)
 	}
 	response := utils.PaginatedResponse{Data: txns, Count: count}
-	// jSONWithPagination(c, http.StatusOK, response)
 	limit, _ := c.MustGet(constants.Limit).(int64)
 	offset, _ := c.MustGet(constants.Offset).(int64)
 	response.HasNext = (response.Count - limit*offset) > 0

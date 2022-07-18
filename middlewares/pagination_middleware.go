@@ -1,9 +1,6 @@
 package middlewares
 
 import (
-	// "clean-architecture/constants"
-	// "clean-architecture/lib"
-	"fmt"
 	"log"
 	"strconv"
 
