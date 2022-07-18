@@ -38,6 +38,19 @@ func (ts transactionSvc) Get(id uint) (models.Transaction, error) {
 // 	return a
 // }
 
+func (ts transactionSvc) ListByAccount(accountId uint) ([]models.Transaction, int64, error) {
+	var txs []models.Transaction
+	paginatedDb := ts.db
+	if ts.paginationScope != nil {
+		paginatedDb = ts.db.Scopes(ts.paginationScope)
+	}
+	var count int64
+	// paginatedDb = paginatedDb.Debug()
+	paginatedDb = paginatedDb.Where(&models.Transaction{AccountID: accountId})
+	err := paginatedDb.Find(&txs).Offset(-1).Limit(-1).Count(&count).Error
+	return txs, count, err
+}
+
 func (ts transactionSvc) List() ([]models.Transaction, int64, error) {
 	var txs []models.Transaction
 	paginatedDb := ts.db

@@ -16,6 +16,7 @@ type TransactionSvc interface {
 	Create(transaction *models.Transaction) error
 	Get(id uint) (models.Transaction, error)
 	List() ([]models.Transaction, int64, error)
+	ListByAccount(accountId uint) ([]models.Transaction, int64, error)
 	SetPaginationScope(scope func(*gorm.DB) *gorm.DB)
 }
 
