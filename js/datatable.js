@@ -9,11 +9,11 @@ $(document).ready(function () {
         displayBuffer: 20
     },
     columns: [
-      { data: "Payee" },
+      { data: "payee" },
       // { data: "Type" },
-      { data: "Amount" },
-      { data: "Memo" },
-      { data: "Date" },
+      { data: "amount" },
+      { data: "memo" },
+      { data: "date" },
     ],
   });
 });
