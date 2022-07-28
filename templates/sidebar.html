@@ -32,7 +32,7 @@
     </li>
     {{range .Accounts}}
     <li class="nav-item {{if eq .ID $selectedAccountID}} active {{end}}">
-        <a class="nav-link" href="/cashflow/{{.ID}}">
+        <a class="nav-link" href="#" onclick="getTransactions({{.ID}})">
             <i class="far fa-fw fa-credit-card"></i>
             <span>{{.Name}}</span>
         </a>
