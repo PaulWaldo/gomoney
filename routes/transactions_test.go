@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	// "github.com/stretchr/testify/assert"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -16,8 +15,14 @@ import (
 	"github.com/PaulWaldo/gomoney/constants"
 	"github.com/PaulWaldo/gomoney/internal/db"
 	"github.com/PaulWaldo/gomoney/pkg/domain/models"
-	"github.com/PaulWaldo/gomoney/utils"
 )
+
+type response struct{
+	Draw int64
+	RecordsTotal int64
+	Data []models.Transaction
+	RecordsFiltered int64
+}
 
 func TestController_AddTransactionRoutes(t *testing.T) {
 	services, db, err := db.NewSqliteInMemoryServices(&gorm.Config{}, false)
@@ -44,15 +49,16 @@ func TestController_AddTransactionRoutes(t *testing.T) {
 	req, err := http.NewRequest(http.MethodGet, constants.TransactionsURL, nil)
 	require.NoErrorf(t, err, "Got error creating request: %s", err)
 	values := req.URL.Query()
-	values.Add("per_page", fmt.Sprintf("%d", pageSize))
-	values.Add("page", "1")
+	values.Add("length", fmt.Sprintf("%d", pageSize))
+	values.Add("start", "1")
+	values.Add("draw", "1")
 	req.URL.RawQuery = values.Encode()
 	controller.router.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusOK, w.Code, "expecting response code %d, got %d", http.StatusInternalServerError, w.Code)
 	t.Logf("response body=%s", w.Body.String())
 
-	var response utils.PaginatedResponse
+	var response response//utils.PaginatedResponse
 	err = json.NewDecoder(w.Body).Decode(&response)
 	require.NoErrorf(t, err, "Got error encoding response: %s", err)
 	t.Logf("converted response=%v", response)
@@ -65,6 +71,6 @@ func TestController_AddTransactionRoutes(t *testing.T) {
 			transactions[i].Payee, data[i].Payee)
 	}
 
-	count := response.Count
+	count := response.RecordsTotal
 	assert.EqualValuesf(t, numItems, count, "expecting response.count to be %d, but got %d", numItems, count)
 }
