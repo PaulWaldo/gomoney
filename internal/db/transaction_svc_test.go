@@ -1,40 +1,17 @@
 package db
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/PaulWaldo/gomoney/pkg/domain/models"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-// func TestNewTransactionSvc(t *testing.T) {
-// 	type args struct {
-// 		db *gorm.DB
-// 	}
-// 	tests := []struct {
-// 		name string
-// 		args args
-// 		want domain.TransactionSvc
-// 	}{
-// 		{
-// 			name: "New service stores database",
-// 			args: args{db: &gorm.DB{}},
-// 			want: domain.TransactionSvc{},
-// 		},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			if got := NewTransactionSvc(tt.args.db); !reflect.DeepEqual(got, tt.want) {
-// 				t.Errorf("NewTransactionSvc() = %v, want %v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }
-
 func Test_transactionSvc_Create(t *testing.T) {
-	type fields struct {
-		// db *gorm.DB
-	}
+	type fields struct{}
 	type args struct {
 		transaction *models.Transaction
 	}
@@ -133,35 +110,86 @@ func Test_transactionSvc_Get(t *testing.T) {
 	}
 }
 
-// func Test_transactionSvc_Get(t *testing.T) {
-// 	type fields struct {
-// 		db *gorm.DB
-// 	}
-// 	type args struct {
-// 		id uint
-// 	}
+func TestList(t *testing.T) {
+	teardownTest, tx := setupTest(t, db)
+	defer teardownTest(t)
+	const numTxs = 10
+	toAdd := make([]models.Transaction, numTxs)
+	for i := 0; i < numTxs; i++ {
+		toAdd[i] = models.Transaction{Payee: fmt.Sprintf("Payee %d", i)}
+	}
+	err := tx.Create(toAdd).Error
+	require.NoErrorf(t, err, "got error creating initial data: %s", err)
+
+	svc := NewTransactionSvc(tx)
+	// svc.SetPaginationScope(scope func(*gorm.DB) *gorm.DB)
+	txns, count, err := svc.List()
+	require.NoErrorf(t, err, "got error callint List: %s", err)
+	require.NotNil(t, txns, "List response is nil")
+	assert.EqualValues(t, numTxs, count, "expecting Count to be %d but got %d", numTxs, count)
+	assert.Equal(t, numTxs, len(txns), "expecting num Data items to be %d but got %d", numTxs, len(txns))
+}
+
+// func Test_transactionSvc_List(t *testing.T) {
+// 	type fields struct{}
+// 	type initialState []models.Transaction
 // 	tests := []struct {
 // 		name    string
 // 		fields  fields
-// 		args    args
-// 		want    *models.Transaction
+// 		toAdd   initialState
+// 		want    []models.Transaction
 // 		wantErr bool
 // 	}{
-// 		// TODO: Add test cases.
+// 		{
+// 			name:    "list all in database",
+// 			toAdd:   initialState{{Payee: "p1"}, {Payee: "p2"}},
+// 			want:    []models.Transaction{{Payee: "p1"}, {Payee: "p2"}},
+// 			wantErr: false,
+// 		},
 // 	}
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
+// 			teardownTest, tx := setupTest(t, db)
+// 			defer teardownTest(t)
+// 			err := tx.Create(tt.toAdd).Error
+// 			require.NoErrorf(t, err, "got error creating initial data: %s", err)
+
 // 			ts := transactionSvc{
-// 				db: tt.fields.db,
+// 				db: tx,
 // 			}
-// 			got, err := ts.Get(tt.args.id)
+// 			got, err := ts.List()
 // 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("transactionSvc.Get() error = %v, wantErr %v", err, tt.wantErr)
+// 				t.Errorf("transactionSvc.List() error = %v, wantErr %v", err, tt.wantErr)
 // 				return
 // 			}
-// 			if !reflect.DeepEqual(got, tt.want) {
-// 				t.Errorf("transactionSvc.Get() = %v, want %v", got, tt.want)
+
+// 			require.Equal(t, len(tt.want), len(got), "expecting %d elements, got %d", len(tt.want), len(got))
+// 			for i := range got {
+// 				require.Equal(t, tt.want[i].Payee, got[i].Payee, "expecting payee %s, but got %s", tt.want[i].Payee, got[i].Payee)
 // 			}
 // 		})
 // 	}
 // }
+
+func Test__transactionSvc_ListByAccount_ReturnsOnlySelectedTransactions(t *testing.T) {
+	teardownTest, tx := setupTest(t, db)
+	defer teardownTest(t)
+	accounts := []models.Account{{Name: "acct1"}, {Name: "acct2"}}
+	tx.Create(&accounts)
+	txns := [] models.Transaction{
+		// Account 1
+		{Payee: "acct1payee1", AccountID: accounts[0].ID},
+		{Payee: "acct1payee2", AccountID: accounts[0].ID},
+		// Account 2
+		{Payee: "acct2payee1", AccountID: accounts[1].ID},
+		{Payee: "acct2payee2", AccountID: accounts[1].ID},
+	}
+	tx.Create((txns))
+
+	svc := NewTransactionSvc(tx)
+	got,count,err := svc.ListByAccount(accounts[1].ID)
+	require.NoError(t, err)
+	require.EqualValuesf(t, 2, count, "expecting 2 transactions for account ID accounts[1].ID, got %d", count)
+	assert.Equal(t, txns[2].Payee, got[0].Payee, "Expecting retrieved payee to be %s, got %s", txns[2].Payee, got[0].Payee)
+	assert.Equal(t, txns[3].Payee, got[1].Payee, "Expecting retrieved payee to be %s, got %s", txns[3].Payee, got[1].Payee)
+}

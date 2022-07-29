@@ -21,8 +21,8 @@ func main() {
 	}
 
 	controller := routes.NewController(r, services)
-
 	controller.AddCashFlowRoutes()
+	controller.AddTransactionRoutes()
 
 	log.Print("Starting server on port 8080")
 	r.Run(":8080")
