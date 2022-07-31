@@ -16,19 +16,17 @@ func makeHeader() *fyne.Container {
 
 func makeLeftSidebar() *fyne.Container {
 	const numAccounts = 10
-	accts := make([]*widget.Label, numAccounts)
+	accts := make([]fyne.CanvasObject, numAccounts)
 	for i := range accts {
-		accts[i] = widget.NewLabel(fmt.Sprintf("Accountd %d", i))
+		accts[i] = widget.NewLabel(fmt.Sprintf("Account %d", i))
 	}
-	return container.NewVBox(accts...)//[0], accts[1], accts[2])
+	return container.NewVBox(accts...)
 }
 
 func makeUI() *fyne.Container {
 	header := makeHeader()
 	leftSideBar := makeLeftSidebar()
-	return container.NewBorder(header, nil, leftSideBar, nil, header, leftSideBar)
-	// return widget.NewLabel("Hello world!"),
-	// 	widget.NewEntry()
+	return container.NewBorder(header, nil, leftSideBar, nil, header, leftSideBar, widget.NewLabel("Center"))
 }
 
 func RunApp() {
