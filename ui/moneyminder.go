@@ -14,12 +14,14 @@ const numAccounts = 10
 const numTransactions = 50
 
 var accts []string
+
 type transaction struct {
-	Name string
+	Name   string
 	Amount float64
-	Date time.Time
-	Memo string
+	Date   time.Time
+	Memo   string
 }
+
 var transactions []transaction
 
 func init() {
@@ -30,10 +32,11 @@ func init() {
 
 	transactions = make([]transaction, numTransactions)
 	amt := 1.0
-	for i, t := range transactions {
-		t.Amount = amt+float64(i)
-		t.Name = fmt.Sprintf("Trans %d", i)
-		t.Date=time.Now().Add
+	for i := range transactions {
+		transactions[i].Amount = amt + float64(i)
+		transactions[i].Name = fmt.Sprintf("Trans %d", i)
+		transactions[i].Date = time.Now().Add(-time.Hour * time.Duration(i))
+		transactions[i].Memo = fmt.Sprintf("Memo for %d", i)
 	}
 }
 
@@ -45,7 +48,7 @@ func makeHeader() *fyne.Container {
 func makeLeftSidebar() *fyne.Container {
 	list := widget.NewList(
 		func() int {
-			return /*rand.Intn*/(numAccounts)
+			return /*rand.Intn*/ (numAccounts)
 		},
 		func() fyne.CanvasObject {
 			return widget.NewLabel("template")
@@ -55,22 +58,35 @@ func makeLeftSidebar() *fyne.Container {
 		},
 	)
 	return container.NewMax(list)
-	// const numAccounts = 10
-	// accts := make([]fyne.CanvasObject, numAccounts)
-	// for i := range accts {
-	// 	accts[i] = widget.NewLabel(fmt.Sprintf("Account %d", i))
-	// }
-	// return container.NewVBox(accts...)
 }
 
 func makeCenter() *fyne.Container {
-
+	list := widget.NewTable(
+		func() (int, int) {
+			return len(transactions), 4
+		},
+		func() fyne.CanvasObject {
+			return widget.NewLabel("wide content")
+		},
+		func(i widget.TableCellID, o fyne.CanvasObject) {
+			switch i.Col {
+			case 0:
+				o.(*widget.Label).SetText(transactions[i.Row].Name)
+			case 1:
+				o.(*widget.Label).SetText(transactions[i.Row].Date.String())
+			case 2:
+				o.(*widget.Label).SetText(fmt.Sprintf("%.2f", transactions[i.Row].Amount))
+			case 3:
+				o.(*widget.Label).SetText(transactions[i.Row].Memo)
+			}
+		})
+	return container.NewMax(list)
 }
 
 func makeUI() *fyne.Container {
 	header := makeHeader()
 	leftSideBar := makeLeftSidebar()
-	return container.NewBorder(header, nil, leftSideBar, nil, header, leftSideBar, widget.NewLabel("Center"))
+	return container.NewBorder(header, nil, leftSideBar, nil, header, leftSideBar, makeCenter())
 }
 
 func RunApp() {
