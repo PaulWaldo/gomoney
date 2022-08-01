@@ -12,6 +12,7 @@ import (
 
 const numAccounts = 10
 const numTransactions = 50
+const YYYYMMDD = "2006-01-02"
 
 var accts []string
 
@@ -35,7 +36,7 @@ func init() {
 	for i := range transactions {
 		transactions[i].Amount = amt + float64(i)
 		transactions[i].Name = fmt.Sprintf("Trans %d", i)
-		transactions[i].Date = time.Now().Add(-time.Hour * time.Duration(i))
+		transactions[i].Date = time.Now().Add(-time.Hour * 24 * time.Duration(i))
 		transactions[i].Memo = fmt.Sprintf("Memo for %d", i)
 	}
 }
@@ -43,6 +44,11 @@ func init() {
 func makeHeader() *fyne.Container {
 	return container.NewHBox(
 		widget.NewLabel("Header"))
+}
+
+func makeFooter() *fyne.Container {
+	return container.NewHBox(
+		widget.NewLabel("Footer"))
 }
 
 func makeLeftSidebar() *fyne.Container {
@@ -61,7 +67,7 @@ func makeLeftSidebar() *fyne.Container {
 }
 
 func makeCenter() *fyne.Container {
-	list := widget.NewTable(
+	table := widget.NewTable(
 		func() (int, int) {
 			return len(transactions), 4
 		},
@@ -73,20 +79,30 @@ func makeCenter() *fyne.Container {
 			case 0:
 				o.(*widget.Label).SetText(transactions[i.Row].Name)
 			case 1:
-				o.(*widget.Label).SetText(transactions[i.Row].Date.String())
+				o.(*widget.Label).SetText(transactions[i.Row].Date.Format(YYYYMMDD))
 			case 2:
 				o.(*widget.Label).SetText(fmt.Sprintf("%.2f", transactions[i.Row].Amount))
 			case 3:
 				o.(*widget.Label).SetText(transactions[i.Row].Memo)
 			}
-		})
-	return container.NewMax(list)
+		},
+	)
+	table.SetColumnWidth(0, 200)
+	table.SetColumnWidth(1, 100)
+	table.SetColumnWidth(2, 100)
+	table.SetColumnWidth(3, 300)
+	split := container.NewHSplit(makeLeftSidebar(), table)
+	split.Offset = 0.2
+
+	return container.NewMax(split)
+
 }
 
 func makeUI() *fyne.Container {
 	header := makeHeader()
-	leftSideBar := makeLeftSidebar()
-	return container.NewBorder(header, nil, leftSideBar, nil, header, leftSideBar, makeCenter())
+	// leftSideBar := makeLeftSidebar()
+	footer := makeFooter()
+	return container.NewBorder(header, footer, nil, nil, header, footer, makeCenter())
 }
 
 func RunApp() {
