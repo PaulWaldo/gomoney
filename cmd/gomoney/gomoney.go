@@ -21,6 +21,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	appData := ui.AppData{Accounts: accounts, Transactions: transactions}
+	appData := ui.AppData{Accounts: accounts, Transactions: transactions, Service: *services}
 	appData.RunApp()
 }

@@ -9,6 +9,8 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+
+
 func (ad AppData) makeCenter() *fyne.Container {
 	var bindings []binding.DataMap
 	for i := range ad.Transactions {
@@ -50,4 +52,15 @@ func (ad AppData) makeCenter() *fyne.Container {
 	split.Offset = 0.2
 
 	return container.NewMax(split)
+}
+
+func (ad *AppData) updateTransactions() error {
+	var err error
+	if ad.selectedAccount == 0 {
+		ad.Transactions, _, err = ad.Service.Transaction.List()
+	} else {
+		ad.Transactions, _, err = ad.Service.Transaction.ListByAccount(ad.selectedAccount)
+	}
+	// TODO: call refresh on the table
+	return err
 }

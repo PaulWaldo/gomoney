@@ -1,11 +1,20 @@
 package ui
 
 import (
+	"fmt"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
 )
+
+func (ad AppData) onSelected(i widget.ListItemID) {
+	err := ad.SetSelectedAccount(uint(i))
+	if err != nil {
+		fmt.Printf("error setting selected account %d: %s\n", i, err)
+	}
+}
 
 func (ad AppData) makeLeftSidebar() *fyne.Container {
 	var bindings []binding.DataMap
@@ -31,5 +40,11 @@ func (ad AppData) makeLeftSidebar() *fyne.Container {
 			o.(*widget.Label).SetText(x)
 		},
 	)
+	list.OnSelected = ad.onSelected
 	return container.NewMax(list)
+}
+
+func (ad AppData) SetSelectedAccount(accountId uint) error{
+	ad.selectedAccount = accountId
+	return ad.updateTransactions()
 }
