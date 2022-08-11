@@ -40,16 +40,18 @@ func MakeTransactionsTable(transactions *[]models.Transaction) *widget.Table {
 		},
 		func(i widget.TableCellID, o fyne.CanvasObject) {
 			switch i.Col {
+			// case 0:
+			// 	payee, err := bindings[i.Row].GetItem("Payee")
+			// 	if err != nil {
+			// 		panic(err)
+			// 	}
+			// 	x, err := payee.(binding.String).Get()
+			// 	if err != nil {
+			// 		panic(err)
+			// 	}
+			// 	o.(*widget.Label).SetText(x)
 			case 0:
-				payee, err := bindings[i.Row].GetItem("Payee")
-				if err != nil {
-					panic(err)
-				}
-				x, err := payee.(binding.String).Get()
-				if err != nil {
-					panic(err)
-				}
-				o.(*widget.Label).SetText(x)
+				o.(*widget.Label).SetText((*transactions)[i.Row].Payee)
 			case 1:
 				o.(*widget.Label).SetText((*transactions)[i.Row].Date.Format(YYYYMMDD))
 			case 2:

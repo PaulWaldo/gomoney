@@ -26,6 +26,7 @@ func (ad *AppData) accountSelected(id widget.ListItemID) {
 	account := ad.Accounts[id]
 	var err error
 	ad.Transactions, _, err = ad.Service.Transaction.ListByAccount(account.ID)
+	ad.transactionsTable.Refresh()
 	if err != nil {
 		panic(err)
 	}
@@ -67,5 +68,6 @@ func RunApp(ad *AppData) {
 	w := a.NewWindow("MoneyMinder")
 	w.Resize(fyne.NewSize(600, 400))
 	w.SetContent(ad.makeUI())
+	// ad.transactionsTable.Refresh()
 	w.ShowAndRun()
 }
