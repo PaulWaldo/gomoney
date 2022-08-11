@@ -34,7 +34,7 @@ func setup() {
 		},
 	)
 	services, db, err = NewSqliteInMemoryServices(&gorm.Config{
-		SkipDefaultTransaction: true,
+		SkipDefaultTransaction: false,
 		Logger:                 newLogger,
 	}, false)
 	if err != nil {

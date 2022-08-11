@@ -6,7 +6,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func (ad AppData) makeFooter() *fyne.Container {
+func MakeHeader() *fyne.Container {
 	return container.NewHBox(
-		widget.NewLabel("Footer"))
+		widget.NewLabel("MoneyMinder"))
 }

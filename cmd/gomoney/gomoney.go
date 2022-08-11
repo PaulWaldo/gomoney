@@ -1,15 +1,31 @@
 package main
 
 import (
-	// "log"
+	"log"
+	"os"
+	"time"
 
+	"github.com/PaulWaldo/gomoney/internal/application"
 	"github.com/PaulWaldo/gomoney/internal/db"
-	"github.com/PaulWaldo/gomoney/ui"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func main() {
-	services, _, err := db.NewSqliteInMemoryServices(&gorm.Config{}, true)
+	useDefaultTransactions := true
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold:             time.Second, // Slow SQL threshold
+			LogLevel:                  logger.Info, // Log level
+			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
+			Colorful:                  true,        // Disable color
+		},
+	)
+	services, _, err := db.NewSqliteInMemoryServices(&gorm.Config{
+		SkipDefaultTransaction: true,
+		Logger:                 newLogger,
+	}, useDefaultTransactions)
 	if err != nil {
 		panic(err)
 	}
@@ -21,6 +37,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	appData := ui.AppData{Accounts: accounts, Transactions: transactions, Service: *services}
-	appData.RunApp()
+	appData := &application.AppData{Accounts: accounts, Transactions: transactions, Service: *services}
+	application.RunApp(appData)
 }
