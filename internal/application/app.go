@@ -11,22 +11,25 @@ import (
 )
 
 type AppData struct {
-	Service         domain.Services
-	Accounts        []models.Account
-	Transactions    []models.Transaction
+	Service      domain.Services
+	Accounts     []models.Account
+	Transactions []models.Transaction
 	// selectedAccount uint
 	// UI Components
 	accountList       *widget.List
 	transactionsTable *widget.Table
 	header            *fyne.Container
-	footer            ui.footer
+	footer            ui.Footer
 }
 
 func (ad *AppData) accountSelected(id widget.ListItemID) {
 	account := ad.Accounts[id]
 	var err error
-	ad.Transactions, _, err = ad.Service.Transaction.ListByAccount(account.ID)
+	var count int64
+	ad.Transactions, count, err = ad.Service.Transaction.ListByAccount(account.ID)
 	ad.transactionsTable.Refresh()
+	ad.footer.SetNumTransactions(count)
+
 	if err != nil {
 		panic(err)
 	}
@@ -35,15 +38,17 @@ func (ad *AppData) accountSelected(id widget.ListItemID) {
 func (ad *AppData) makeUI() *fyne.Container {
 	// ad.SetSelectedAccount(0)
 	ad.header = ui.MakeHeader()
-	ad.footer = ui.MakeFooter()
+	ad.footer = ui.NewFooter()
+	footer := container.NewHBox(ad.footer.Label)
 	ad.accountList = ui.MakeAccountList(&ad.Accounts)
 	ad.accountList.OnSelected = ad.accountSelected
 	ad.transactionsTable = ui.MakeTransactionsTable(&ad.Transactions)
+	ad.footer.SetNumTransactions(int64(len(ad.Transactions)))
 
 	center := container.NewHSplit(ad.accountList, ad.transactionsTable)
 	center.Offset = 0.2
 
-	return container.NewBorder(ad.header, ad.footer, nil, nil /*header, footer,*/, center)
+	return container.NewBorder(ad.header, footer, nil, nil /*header, footer,*/, center)
 }
 
 func RunApp(ad *AppData) {

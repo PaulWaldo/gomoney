@@ -7,31 +7,13 @@ import (
 	"github.com/PaulWaldo/gomoney/pkg/domain/models"
 )
 
-// type accountList struct {
-// 	// accounts *[]models.Account
-// 	widget *widget.List
-// }
-
-// func (al accountList) onSelected(i widget.ListItemID) {
-// 	err := ad.SetSelectedAccount(uint(i))
-// 	if err != nil {
-// 		fmt.Printf("error setting selected account %d: %s\n", i, err)
-// 	}
-// }
-
-// func NewAccountList(accounts *[]models.Account) *accountList {
-// 	al := &accountList{}
-// 	al.makeAccountList(accounts)
-// 	return al
-// }
-
 func MakeAccountList(accounts *[]models.Account) *widget.List {
 	var bindings []binding.DataMap
 	for i := range *accounts {
 		x := (*accounts)[i]
 		bindings = append(bindings, binding.BindStruct(&x))
 	}
-	list:= widget.NewList(
+	list := widget.NewList(
 		func() int {
 			return len(*accounts)
 		},
