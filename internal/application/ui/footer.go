@@ -6,7 +6,11 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func MakeFooter() *fyne.Container {
-	return container.NewHBox(
-		widget.NewLabel("Footer"))
+type Footer struct {
+	Label *widget.Label
+}
+
+func (f *Footer) MakeFooter() *fyne.Container {
+	f.Label = widget.NewLabel("Footer")
+	return container.NewHBox(f.Label)
 }

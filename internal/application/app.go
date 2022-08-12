@@ -14,12 +14,12 @@ type AppData struct {
 	Service         domain.Services
 	Accounts        []models.Account
 	Transactions    []models.Transaction
-	selectedAccount uint
+	// selectedAccount uint
 	// UI Components
 	accountList       *widget.List
 	transactionsTable *widget.Table
 	header            *fyne.Container
-	footer            *fyne.Container
+	footer            ui.footer
 }
 
 func (ad *AppData) accountSelected(id widget.ListItemID) {
@@ -31,23 +31,6 @@ func (ad *AppData) accountSelected(id widget.ListItemID) {
 		panic(err)
 	}
 }
-
-// func (ad AppData) makeLeftSidebar() *fyne.Container {
-// 	ad.accountList = NewAccountList(&ad.Accounts)
-// 	ad.accountList.widget.OnSelected = ad.accountSelected
-// 	return container.NewMax(ad.accountList.widget)
-// }
-
-// func (ad AppData) makeAccountList() *widget.List {
-// 	ad.accountList = NewAccountList(&ad.Accounts)
-// 	ad.accountList.widget.OnSelected = ad.accountSelected
-// 	return ad.accountList.widget
-// }
-
-// func (ad AppData) makeTransactionsTable() *widget.Table{
-// 	table := NewTransactionsTable(&ad.Transactions)
-// 	return table.table
-// }
 
 func (ad *AppData) makeUI() *fyne.Container {
 	// ad.SetSelectedAccount(0)
