@@ -4,33 +4,18 @@ import (
 	"fmt"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/data/binding"
+	// "fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
 	"github.com/PaulWaldo/gomoney/pkg/domain/models"
 )
 
-// type transactionTable struct {
-// 	table *widget.Table
-// 	// ad    *AppData
-// 	// 	Service domain.Services
-// 	// Accounts     []models.Account
-// 	// Transactions []models.Transaction
-// 	// selectedAccount uint
-
-// }
-
-// func NewTransactionsTable(transactions *[]models.Transaction) *transactionTable {
-// 	tt := transactionTable{}
-// 	tt.table = tt.makeTable(transactions)
-// 	return &tt
-// }
 const YYYYMMDD = "2006-01-02"
 
 func MakeTransactionsTable(transactions *[]models.Transaction) *widget.Table {
-	var bindings []binding.DataMap
-	for i := range *transactions {
-		bindings = append(bindings, binding.BindStruct(&(*transactions)[i]))
-	}
+	// var bindings []binding.DataMap
+	// for i := range *transactions {
+	// 	bindings = append(bindings, binding.BindStruct(&(*transactions)[i]))
+	// }
 	table := widget.NewTable(
 		func() (int, int) {
 			return len(*transactions), 4
