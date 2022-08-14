@@ -18,7 +18,7 @@ type AppData struct {
 	// UI Components
 	accountList       *widget.List
 	transactionsTable *widget.Table
-	header            *fyne.Container
+	header            ui.Header
 	footer            ui.Footer
 }
 
@@ -48,14 +48,14 @@ func (ad *AppData) makeUI() *fyne.Container {
 	center := container.NewHSplit(ad.accountList, ad.transactionsTable)
 	center.Offset = 0.2
 
-	return container.NewBorder(ad.header, footer, nil, nil /*header, footer,*/, center)
+	return container.NewBorder(ad.header.Container, footer, nil, nil /*header, footer,*/, center)
 }
 
 func RunApp(ad *AppData) {
 	a := app.New()
 	w := a.NewWindow("MoneyMinder")
 	w.SetMainMenu(fyne.NewMainMenu(
-		fyne.NewMenu("File", func(){}),
+		fyne.NewMenu("File", fyne.NewMenuItem("Open...", func() {})),
 	))
 	w.Resize(fyne.NewSize(1000, 600))
 	w.SetContent(ad.makeUI())
