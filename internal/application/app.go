@@ -54,7 +54,10 @@ func (ad *AppData) makeUI() *fyne.Container {
 func RunApp(ad *AppData) {
 	a := app.New()
 	w := a.NewWindow("MoneyMinder")
-	w.Resize(fyne.NewSize(600, 400))
+	w.SetMainMenu(fyne.NewMainMenu(
+		fyne.NewMenu("File", func(){}),
+	))
+	w.Resize(fyne.NewSize(1000, 600))
 	w.SetContent(ad.makeUI())
 	// ad.transactionsTable.Refresh()
 	w.ShowAndRun()
