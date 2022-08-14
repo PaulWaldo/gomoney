@@ -10,10 +10,10 @@ type Footer struct {
 	Label *widget.Label
 }
 
-func NewFooter() Footer {
-	return Footer{Label: widget.NewLabel("Footer")}
+func NewFooter() *Footer {
+	return &Footer{Label: widget.NewLabel("Footer")}
 }
 
-func (f Footer) SetNumTransactions(n int64) {
+func (f *Footer) SetNumTransactions(n int64) {
 	f.Label.SetText(fmt.Sprintf("%d Transactions", n))
 }

@@ -38,7 +38,7 @@ func (ad *AppData) accountSelected(id widget.ListItemID) {
 func (ad *AppData) makeUI() *fyne.Container {
 	// ad.SetSelectedAccount(0)
 	ad.header = ui.MakeHeader()
-	ad.footer = ui.NewFooter()
+	ad.footer = *ui.NewFooter()
 	footer := container.NewHBox(ad.footer.Label)
 	ad.accountList = ui.MakeAccountList(&ad.Accounts)
 	ad.accountList.OnSelected = ad.accountSelected
