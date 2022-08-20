@@ -1,6 +1,8 @@
 package application
 
 import (
+	"fmt"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
@@ -17,9 +19,12 @@ type AppData struct {
 	// selectedAccount uint
 	// UI Components
 	accountList       *widget.List
-	transactionsTable *widget.Table
+	transactionsTable ui.TransactionsTable
+	entryInfoPanel    ui.EntryInfoPanel
 	header            ui.Header
 	footer            ui.Footer
+	app               fyne.App
+	mainWindow        fyne.Window
 }
 
 func (ad *AppData) accountSelected(id widget.ListItemID) {
@@ -27,7 +32,7 @@ func (ad *AppData) accountSelected(id widget.ListItemID) {
 	var err error
 	var count int64
 	ad.Transactions, count, err = ad.Service.Transaction.ListByAccount(account.ID)
-	ad.transactionsTable.Refresh()
+	// ad.transactionsTable.Refresh()
 	ad.footer.SetNumTransactions(count)
 
 	if err != nil {
@@ -35,30 +40,46 @@ func (ad *AppData) accountSelected(id widget.ListItemID) {
 	}
 }
 
-func (ad *AppData) makeUI() *fyne.Container {
+func (ad *AppData) makeUI(mainWindow fyne.Window) *fyne.Container {
 	// ad.SetSelectedAccount(0)
 	ad.header = ui.MakeHeader()
 	ad.footer = *ui.NewFooter()
 	footer := container.NewHBox(ad.footer.Label)
 	ad.accountList = ui.MakeAccountList(&ad.Accounts)
 	ad.accountList.OnSelected = ad.accountSelected
-	ad.transactionsTable = ui.MakeTransactionsTable(&ad.Transactions)
+	ad.transactionsTable = ui.MakeTransactionsTable(&ad.Transactions, ad.mainWindow)
+	ad.entryInfoPanel = *ui.MakeEntryInfoPanel()
 	ad.footer.SetNumTransactions(int64(len(ad.Transactions)))
 
-	center := container.NewHSplit(ad.accountList, ad.transactionsTable)
+	// coloredRect := canvas.NewRectangle(color.RGBA{R: 128, A: 128})
+	center := container.NewHSplit(
+		ad.accountList,
+		container.NewBorder(nil, nil, nil, &ad.entryInfoPanel.Form,
+			ad.transactionsTable.Table,
+		),
+	)
+	// ad.entryInfoPanel.Form.Hide()
+	fmt.Printf("Table MinSize: %v\n", ad.transactionsTable.Table.MinSize())
+	fmt.Printf("InfoPanel MinSize: %v\n", ad.entryInfoPanel.Form.MinSize())
 	center.Offset = 0.2
 
 	return container.NewBorder(ad.header.Container, footer, nil, nil /*header, footer,*/, center)
 }
 
 func RunApp(ad *AppData) {
-	a := app.New()
-	w := a.NewWindow("MoneyMinder")
-	w.SetMainMenu(fyne.NewMainMenu(
+	ad.app = app.New()
+	ad.mainWindow = ad.app.NewWindow("MoneyMinder")
+	ad.mainWindow.SetMainMenu(fyne.NewMainMenu(
 		fyne.NewMenu("File", fyne.NewMenuItem("Open...", func() {})),
 	))
-	w.Resize(fyne.NewSize(1000, 600))
-	w.SetContent(ad.makeUI())
+	ad.mainWindow.Resize(fyne.NewSize(1000, 600))
+	ad.mainWindow.SetContent(ad.makeUI(ad.mainWindow))
+	ad.header.InfoButton.OnTapped = ad.modifyTransaction
 	// ad.transactionsTable.Refresh()
-	w.ShowAndRun()
+	ad.mainWindow.ShowAndRun()
+}
+
+func (ad *AppData) modifyTransaction() {
+	i := ui.InfoFormDialog{Parent: ad.mainWindow}
+	i.ShowInfoForm()
 }

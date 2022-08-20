@@ -11,7 +11,15 @@ import (
 
 const YYYYMMDD = "2006-01-02"
 
-func MakeTransactionsTable(transactions *[]models.Transaction) *widget.Table {
+type TransactionsTable struct {
+	Table        *widget.Table
+	Selected     *models.Transaction
+	Transactions *[]models.Transaction
+	mainWindow   fyne.Window
+}
+
+func MakeTransactionsTable(transactions *[]models.Transaction, mainWindow fyne.Window) TransactionsTable {
+	// https://stackoverflow.com/questions/68085584/binding-table-data-in-go-fyne/73268350#73268350
 	// var bindings []binding.DataMap
 	// for i := range *transactions {
 	// 	bindings = append(bindings, binding.BindStruct(&(*transactions)[i]))
@@ -51,7 +59,16 @@ func MakeTransactionsTable(transactions *[]models.Transaction) *widget.Table {
 	table.SetColumnWidth(2, 100)
 	table.SetColumnWidth(3, 300)
 
-	return table
+	tt := TransactionsTable{Table: table, Transactions: transactions, mainWindow: mainWindow}
+	table.OnSelected = tt.OnSelected
+	return tt
+}
+
+func (tt *TransactionsTable) OnSelected(i widget.TableCellID) {
+	fmt.Printf("Selected %v\n", i)
+	tt.Selected = &((*tt.Transactions)[i.Row])
+	d := InfoFormDialog{Parent: tt.mainWindow, Transaction: tt.Selected}
+	d.ShowInfoForm()
 }
 
 // func (tt transactionTable) updateTransactions() error {
