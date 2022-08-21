@@ -1,8 +1,6 @@
 package application
 
 import (
-	"fmt"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
@@ -51,23 +49,28 @@ func (ad *AppData) makeUI(mainWindow fyne.Window) *fyne.Container {
 	ad.accountList.OnSelected = ad.accountSelected
 	ad.footer.SetNumTransactions(int64(len(ad.Transactions)))
 
+	footerContainer:= container.NewHBox(ad.footer.Label)
+
 	// coloredRect := canvas.NewRectangle(color.RGBA{R: 128, A: 128})
-	accountsAndTransactions:=container.NewHSplit(ad.accountList, ad.transactionsTable.Table)
-	allSplits:= container.NewHSplit(accountsAndTransactions, &ad.entryInfoPanel.Form)
-	center := container.NewHSplit(
-		ad.accountList,
-		container.NewBorder(nil, nil, nil, &ad.entryInfoPanel.Form,
-			ad.transactionsTable.Table,
-		),
-	)
+	accountsAndTransactions := container.NewHSplit(ad.accountList, ad.transactionsTable.Table)
+	accountsAndTransactions.SetOffset(0.2)
+	allSplits := container.NewHSplit(accountsAndTransactions, &ad.entryInfoPanel.Form)
+	allSplits.SetOffset(0.8)
+	// center := container.NewHSplit(
+	// 	ad.accountList,
+	// 	container.NewBorder(nil, nil, nil, &ad.entryInfoPanel.Form,
+	// 		// ad.transactionsTable.Table,
+	// 		allSplits,
+	// 	),
+	// )
 	// ad.entryInfoPanel.Form.Hide()
-	fmt.Printf("Table MinSize: %v\n", ad.transactionsTable.Table.MinSize())
-	fmt.Printf("InfoPanel MinSize: %v\n", ad.entryInfoPanel.Form.MinSize())
-	center.Offset = 0.2
+	// fmt.Printf("Table MinSize: %v\n", ad.transactionsTable.Table.MinSize())
+	// fmt.Printf("InfoPanel MinSize: %v\n", ad.entryInfoPanel.Form.MinSize())
+	// center.Offset = 0.2
 
 	return container.NewBorder(
-		ad.header.Container, ad.footer.Container, nil, nil,
-		center,
+		ad.header.Container, footerContainer, nil, nil,
+		allSplits,
 	)
 }
 
