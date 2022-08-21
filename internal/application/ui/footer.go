@@ -3,15 +3,19 @@ package ui
 import (
 	"fmt"
 
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 )
 
 type Footer struct {
-	Label *widget.Label
+	Label     *widget.Label
+	Container *fyne.Container
 }
 
 func NewFooter() *Footer {
-	return &Footer{Label: widget.NewLabel("Footer")}
+	w := widget.NewLabel("Footer")
+	return &Footer{Label: w, Container: container.NewHBox(w)}
 }
 
 func (f *Footer) SetNumTransactions(n int64) {

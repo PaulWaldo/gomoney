@@ -44,14 +44,16 @@ func (ad *AppData) makeUI(mainWindow fyne.Window) *fyne.Container {
 	// ad.SetSelectedAccount(0)
 	ad.header = ui.MakeHeader()
 	ad.footer = *ui.NewFooter()
-	footer := container.NewHBox(ad.footer.Label)
 	ad.accountList = ui.MakeAccountList(&ad.Accounts)
-	ad.accountList.OnSelected = ad.accountSelected
 	ad.transactionsTable = ui.MakeTransactionsTable(&ad.Transactions, ad.mainWindow)
 	ad.entryInfoPanel = *ui.MakeEntryInfoPanel()
+
+	ad.accountList.OnSelected = ad.accountSelected
 	ad.footer.SetNumTransactions(int64(len(ad.Transactions)))
 
 	// coloredRect := canvas.NewRectangle(color.RGBA{R: 128, A: 128})
+	accountsAndTransactions:=container.NewHSplit(ad.accountList, ad.transactionsTable.Table)
+	allSplits:= container.NewHSplit(accountsAndTransactions, &ad.entryInfoPanel.Form)
 	center := container.NewHSplit(
 		ad.accountList,
 		container.NewBorder(nil, nil, nil, &ad.entryInfoPanel.Form,
@@ -63,7 +65,10 @@ func (ad *AppData) makeUI(mainWindow fyne.Window) *fyne.Container {
 	fmt.Printf("InfoPanel MinSize: %v\n", ad.entryInfoPanel.Form.MinSize())
 	center.Offset = 0.2
 
-	return container.NewBorder(ad.header.Container, footer, nil, nil /*header, footer,*/, center)
+	return container.NewBorder(
+		ad.header.Container, ad.footer.Container, nil, nil,
+		center,
+	)
 }
 
 func RunApp(ad *AppData) {
