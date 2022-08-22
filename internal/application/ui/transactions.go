@@ -11,10 +11,12 @@ import (
 
 const YYYYMMDD = "2006-01-02"
 
+type TableSelectedCallback func(i widget.TableCellID)
 type TransactionsTable struct {
 	Table        *widget.Table
 	Selected     *models.Transaction
 	Transactions *[]models.Transaction
+	// OnSelected   TableSelectedCallback
 	mainWindow   fyne.Window
 }
 
@@ -60,24 +62,17 @@ func MakeTransactionsTable(transactions *[]models.Transaction, mainWindow fyne.W
 	table.SetColumnWidth(3, 300)
 
 	tt := TransactionsTable{Table: table, Transactions: transactions, mainWindow: mainWindow}
-	table.OnSelected = tt.OnSelected
+	// table.OnSelected = tt.OnSelected
 	return tt
 }
 
-func (tt *TransactionsTable) OnSelected(i widget.TableCellID) {
-	fmt.Printf("Selected %v\n", i)
-	tt.Selected = &((*tt.Transactions)[i.Row])
-	d := InfoFormDialog{Parent: tt.mainWindow, Transaction: tt.Selected}
-	d.ShowInfoForm()
+func (tt *TransactionsTable) SetOnSelectedCallback(t TableSelectedCallback) {
+	tt.Table.OnSelected = t
 }
 
-// func (tt transactionTable) updateTransactions() error {
-// 	var err error
-// 	if ad.selectedAccount == 0 {
-// 		ad.Transactions, _, err = ad.Service.Transaction.List()
-// 	} else {
-// 		ad.Transactions, _, err = ad.Service.Transaction.ListByAccount(ad.selectedAccount)
-// 	}
-// 	// TODO: call refresh on the table
-// 	return err
+// func (tt *TransactionsTable) OnSelected(i widget.TableCellID) {
+// 	fmt.Printf("Selected %v\n", i)
+// 	tt.Selected = &((*tt.Transactions)[i.Row])
+// 	d := InfoFormDialog{Parent: tt.mainWindow, Transaction: tt.Selected}
+// 	d.ShowInfoForm()
 // }

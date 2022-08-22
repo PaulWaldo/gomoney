@@ -1,6 +1,8 @@
 package application
 
 import (
+	"fmt"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
@@ -38,6 +40,19 @@ func (ad *AppData) accountSelected(id widget.ListItemID) {
 	}
 }
 
+func (ad *AppData) transactionSelected(i widget.TableCellID) {
+	ad.entryInfoPanel.SetTransaction(&ad.Transactions[i.Row])
+}
+
+func (ad *AppData) onSubmit() {
+	fmt.Println("Submitting")
+	ad.transactionsTable.Table.Refresh()
+}
+
+func (ad *AppData) onCancel() {
+	fmt.Println("Cancelling")
+}
+
 func (ad *AppData) makeUI(mainWindow fyne.Window) *fyne.Container {
 	// ad.SetSelectedAccount(0)
 	ad.header = ui.MakeHeader()
@@ -47,9 +62,12 @@ func (ad *AppData) makeUI(mainWindow fyne.Window) *fyne.Container {
 	ad.entryInfoPanel = *ui.MakeEntryInfoPanel()
 
 	ad.accountList.OnSelected = ad.accountSelected
+	ad.transactionsTable.SetOnSelectedCallback(ad.transactionSelected)
+	ad.entryInfoPanel.Form.OnCancel = ad.onCancel
+	ad.entryInfoPanel.Form.OnSubmit = ad.onSubmit
 	ad.footer.SetNumTransactions(int64(len(ad.Transactions)))
 
-	footerContainer:= container.NewHBox(ad.footer.Label)
+	footerContainer := container.NewHBox(ad.footer.Label)
 
 	// coloredRect := canvas.NewRectangle(color.RGBA{R: 128, A: 128})
 	accountsAndTransactions := container.NewHSplit(ad.accountList, ad.transactionsTable.Table)
@@ -88,6 +106,6 @@ func RunApp(ad *AppData) {
 }
 
 func (ad *AppData) modifyTransaction() {
-	i := ui.InfoFormDialog{Parent: ad.mainWindow}
-	i.ShowInfoForm()
+	// i := ui.InfoFormDialog{Parent: ad.mainWindow}
+	// i.ShowInfoForm()
 }
