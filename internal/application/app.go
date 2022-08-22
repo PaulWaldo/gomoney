@@ -69,22 +69,10 @@ func (ad *AppData) makeUI(mainWindow fyne.Window) *fyne.Container {
 
 	footerContainer := container.NewHBox(ad.footer.Label)
 
-	// coloredRect := canvas.NewRectangle(color.RGBA{R: 128, A: 128})
 	accountsAndTransactions := container.NewHSplit(ad.accountList, ad.transactionsTable.Table)
 	accountsAndTransactions.SetOffset(0.2)
 	allSplits := container.NewHSplit(accountsAndTransactions, &ad.entryInfoPanel.Form)
 	allSplits.SetOffset(0.8)
-	// center := container.NewHSplit(
-	// 	ad.accountList,
-	// 	container.NewBorder(nil, nil, nil, &ad.entryInfoPanel.Form,
-	// 		// ad.transactionsTable.Table,
-	// 		allSplits,
-	// 	),
-	// )
-	// ad.entryInfoPanel.Form.Hide()
-	// fmt.Printf("Table MinSize: %v\n", ad.transactionsTable.Table.MinSize())
-	// fmt.Printf("InfoPanel MinSize: %v\n", ad.entryInfoPanel.Form.MinSize())
-	// center.Offset = 0.2
 
 	return container.NewBorder(
 		ad.header.Container, footerContainer, nil, nil,
@@ -101,11 +89,8 @@ func RunApp(ad *AppData) {
 	ad.mainWindow.Resize(fyne.NewSize(1000, 600))
 	ad.mainWindow.SetContent(ad.makeUI(ad.mainWindow))
 	ad.header.InfoButton.OnTapped = ad.modifyTransaction
-	// ad.transactionsTable.Refresh()
 	ad.mainWindow.ShowAndRun()
 }
 
 func (ad *AppData) modifyTransaction() {
-	// i := ui.InfoFormDialog{Parent: ad.mainWindow}
-	// i.ShowInfoForm()
 }
