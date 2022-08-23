@@ -1,6 +1,10 @@
 package ui
 
 import (
+	"fmt"
+	"strconv"
+	"time"
+
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
 	"github.com/PaulWaldo/gomoney/pkg/domain/models"
@@ -12,16 +16,23 @@ type EntryInfoPanel struct {
 	amount      *widget.Entry
 	memo        *widget.Entry
 	date        *widget.Entry
-	transaction *models.Transaction
+	original    models.Transaction
+	Transaction models.Transaction
 }
 
-// func (eip *EntryInfoPanel) onSubmit() {
-// 	fmt.Println("Submitting")
-// }
+func (eip *EntryInfoPanel) GetSubmitted() models.Transaction {
+	return eip.Transaction
+}
 
-// func (eip *EntryInfoPanel) onCancel() {
-// 	fmt.Println("Cancelling")
-// }
+func (eip *EntryInfoPanel) OnSubmit() {
+	// eip.Form.Refresh()
+}
+
+func (eip *EntryInfoPanel) OnCancel() {
+	fmt.Println("Putting data back")
+	eip.SetTransaction(eip.original)
+	eip.Form.Refresh()
+}
 
 func MakeEntryInfoPanel() *EntryInfoPanel {
 	eip := &EntryInfoPanel{
@@ -30,22 +41,43 @@ func MakeEntryInfoPanel() *EntryInfoPanel {
 		memo:   widget.NewMultiLineEntry(),
 		date:   widget.NewEntry(),
 	}
+	// eip.date.SetText(formatDate(eip.date.Text))
 	eip.Form = *widget.NewForm(
 		widget.NewFormItem("Payee", eip.payee),
 		widget.NewFormItem("Amount", eip.amount),
 		widget.NewFormItem("Memo", eip.memo),
 		widget.NewFormItem("Date", eip.date),
 	)
-	// eip.Form.OnCancel = eip.onCancel
-	// eip.Form.OnSubmit = eip.onSubmit
+	// eip.date.Validator = dateValidator
+	eip.amount.Validator = amountValidator
 	return eip
 }
 
-func (eip *EntryInfoPanel) SetTransaction(t *models.Transaction) {
-	eip.transaction = t
-	eip.payee.Bind(binding.BindString(&t.Payee))
-	amountStr := binding.FloatToStringWithFormat(binding.BindFloat(&t.Amount), "$%5.2f")
+// const dateFormat = "02 Jan 06 15:04"
+func formatDate(date *time.Time) string {
+	if date == nil {
+		return ""
+	}
+	return date.Format(YYYYMMDD)
+}
+
+func dateValidator(d string) error {
+	_, err := time.Parse(YYYYMMDD, d)
+	return err
+}
+
+func amountValidator(a string) error {
+	_, err := strconv.ParseFloat(a, 64)
+	return err
+}
+
+func (eip *EntryInfoPanel) SetTransaction(t models.Transaction) {
+	eip.original = t
+	// Copy the original so that a Cancel will not change the data
+	eip.Transaction = eip.original
+	eip.payee.Bind(binding.BindString(&eip.Transaction.Payee))
+	amountStr := binding.FloatToStringWithFormat(binding.BindFloat(&eip.Transaction.Amount), "%5.2f")
 	eip.amount.Bind(amountStr)
-	eip.memo.Bind(binding.BindString(&t.Memo))
+	eip.memo.Bind(binding.BindString(&eip.Transaction.Memo))
 	// eip.date.Bind(binding.BindString(t.Date))
 }
