@@ -17,7 +17,7 @@ type TransactionsTable struct {
 	Selected     *models.Transaction
 	Transactions *[]models.Transaction
 	// OnSelected   TableSelectedCallback
-	mainWindow   fyne.Window
+	mainWindow fyne.Window
 }
 
 func MakeTransactionsTable(transactions *[]models.Transaction, mainWindow fyne.Window) TransactionsTable {

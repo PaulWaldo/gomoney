@@ -7,13 +7,13 @@ import (
 )
 
 type Footer struct {
-	Label     *widget.Label
+	Label *widget.Label
 	// Container *fyne.Container
 }
 
 func NewFooter() *Footer {
 	w := widget.NewLabel("Footer")
-	return &Footer{Label: w, /*Container: container.NewHBox(w)*/}
+	return &Footer{Label: w /*Container: container.NewHBox(w)*/}
 }
 
 func (f *Footer) SetNumTransactions(n int64) {
