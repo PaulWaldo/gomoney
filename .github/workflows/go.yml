@@ -19,6 +19,7 @@ jobs:
         go-version: 1.18
 
     - name: Build
+      run: sudo apt-get install libgl1-mesa-dev and xorg-dev
       run: go build -v ./...
 
     - name: Test

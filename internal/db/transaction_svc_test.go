@@ -176,7 +176,7 @@ func Test__transactionSvc_ListByAccount_ReturnsOnlySelectedTransactions(t *testi
 	defer teardownTest(t)
 	accounts := []models.Account{{Name: "acct1"}, {Name: "acct2"}}
 	tx.Create(&accounts)
-	txns := [] models.Transaction{
+	txns := []models.Transaction{
 		// Account 1
 		{Payee: "acct1payee1", AccountID: accounts[0].ID},
 		{Payee: "acct1payee2", AccountID: accounts[0].ID},
@@ -187,7 +187,7 @@ func Test__transactionSvc_ListByAccount_ReturnsOnlySelectedTransactions(t *testi
 	tx.Create((txns))
 
 	svc := NewTransactionSvc(tx)
-	got,count,err := svc.ListByAccount(accounts[1].ID)
+	got, count, err := svc.ListByAccount(accounts[1].ID)
 	require.NoError(t, err)
 	require.EqualValuesf(t, 2, count, "expecting 2 transactions for account ID accounts[1].ID, got %d", count)
 	assert.Equal(t, txns[2].Payee, got[0].Payee, "Expecting retrieved payee to be %s, got %s", txns[2].Payee, got[0].Payee)
