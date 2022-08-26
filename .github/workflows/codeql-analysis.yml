@@ -68,7 +68,7 @@ jobs:
       #         cache-dependency-path: # optional
 
       - name: Install OS dependencies
-        run: sudo apt-get update && sudo apt-get install libgl1-mesa-dev and xorg-dev
+        run: sudo apt-get update && sudo apt-get install libgl1-mesa-dev xorg-dev
 
       # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
       # If this step fails, then you should remove it and run the build manually (see below)
