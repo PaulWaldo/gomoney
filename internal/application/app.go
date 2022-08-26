@@ -2,14 +2,21 @@ package application
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 	"github.com/PaulWaldo/gomoney/internal/application/ui"
+	"github.com/PaulWaldo/gomoney/internal/db"
 	"github.com/PaulWaldo/gomoney/pkg/domain"
 	"github.com/PaulWaldo/gomoney/pkg/domain/models"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type AppData struct {
@@ -86,12 +93,76 @@ func (ad *AppData) makeUI(mainWindow fyne.Window) *fyne.Container {
 	)
 }
 
+func (ad *AppData) openDatabase(file string) error {
+	// useDefaultTransactions := true
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold:             time.Second, // Slow SQL threshold
+			LogLevel:                  logger.Info, // Log level
+			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
+			Colorful:                  true,        // Disable color
+		},
+	)
+	services, _, err := db.NewSqliteDiskServices(file, &gorm.Config{
+		SkipDefaultTransaction: true,
+		Logger:                 newLogger,
+	})
+	if err != nil {
+		return err
+	}
+	ad.Transactions, _, err = services.Transaction.List()
+	if err != nil {
+		return err
+	}
+	ad.Accounts, err = services.Account.List()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ad *AppData) chooseDatabaseFile(w fyne.Window) (filename string, err error) {
+	dialog.ShowFileOpen(func(rc fyne.URIReadCloser, e error) {
+		if e != nil {
+			dialog.ShowError(e, w)
+			err = e
+			return
+		}
+		if rc == nil {
+			return
+		}
+		filename := rc.URI().Path()
+		fmt.Println(filename)
+		ad.openDatabase(filename)
+	}, w)
+	return filename, err
+}
+
+func (ad *AppData) createDatabaseFile(w fyne.Window) {
+	dialog.ShowFileSave(func(rc fyne.URIWriteCloser, e error) {
+		if e != nil {
+			dialog.ShowError(e, w)
+			return
+		}
+		if rc == nil {
+			return
+		}
+		filename := rc.URI().Path()
+		fmt.Println(filename)
+		ad.openDatabase(filename)
+	}, w)
+}
+
 func RunApp(ad *AppData) {
 	ad.app = app.New()
 	ad.mainWindow = ad.app.NewWindow("MoneyMinder")
 	ad.mainWindow.SetMainMenu(fyne.NewMainMenu(
-		fyne.NewMenu("File", fyne.NewMenuItem("Open...", func() {})),
-	))
+		fyne.NewMenu("File",
+			fyne.NewMenuItem("New...", func() { ad.createDatabaseFile(ad.mainWindow) }),
+			fyne.NewMenuItem("Open...", func() { ad.chooseDatabaseFile(ad.mainWindow) }),
+		)),
+	)
 	ad.mainWindow.Resize(fyne.NewSize(1000, 600))
 	ad.mainWindow.SetContent(ad.makeUI(ad.mainWindow))
 	ad.header.InfoButton.OnTapped = ad.modifyTransaction

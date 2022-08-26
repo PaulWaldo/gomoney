@@ -124,3 +124,12 @@ func NewSqliteInMemoryServices(gormConfig *gorm.Config, createDummyData bool) (*
 	}
 	return s, db, nil
 }
+
+func NewSqliteDiskServices(dsn string, gormConfig *gorm.Config) (*domain.Services, *gorm.DB, error) {
+	db, err := connectToDatabase(dsn, gormConfig)
+	if err != nil {
+		return nil, nil, err
+	}
+	s := &domain.Services{Account: NewAccountSvc(db), Transaction: NewTransactionSvc(db)}
+	return s, db, nil
+}
