@@ -2,25 +2,26 @@ name: Go
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: ["develop"]
   pull_request:
-    branches: [ "develop" ]
+    branches: ["develop"]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.18
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
 
-    - name: Build
-      run: sudo apt-get install libgl1-mesa-dev and xorg-dev
-      run: go build -v ./...
+      - name: Install OS dependencies
+        run: sudo apt updatsudo apt update && e && sudo apt-get install libgl1-mesa-dev and xorg-dev
 
-    - name: Test
-      run: go test -v ./...
+      - name: Build
+        run: go build -v ./...
+
+      - name: Test
+        run: go test -v ./...
