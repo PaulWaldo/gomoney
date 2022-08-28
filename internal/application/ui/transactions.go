@@ -69,10 +69,3 @@ func MakeTransactionsTable(transactions *[]models.Transaction, mainWindow fyne.W
 func (tt *TransactionsTable) SetOnSelectedCallback(t TableSelectedCallback) {
 	tt.Table.OnSelected = t
 }
-
-// func (tt *TransactionsTable) OnSelected(i widget.TableCellID) {
-// 	fmt.Printf("Selected %v\n", i)
-// 	tt.Selected = &((*tt.Transactions)[i.Row])
-// 	d := InfoFormDialog{Parent: tt.mainWindow, Transaction: tt.Selected}
-// 	d.ShowInfoForm()
-// }
