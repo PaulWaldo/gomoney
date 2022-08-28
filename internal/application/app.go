@@ -25,14 +25,16 @@ type AppData struct {
 	Transactions []models.Transaction
 	// selectedAccount uint
 	// UI Components
-	accountList        *widget.List
-	transactionsTable  ui.TransactionsTable
-	entryInfoPanel     ui.EntryInfoPanel
-	header             ui.Header
-	footer             ui.Footer
-	app                fyne.App
-	mainWindow         fyne.Window
-	transactionEditRow int
+	accountList                     *widget.List
+	transactionsTable               ui.TransactionsTable
+	entryInfoPanel                  ui.EntryInfoPanel
+	header                          ui.Header
+	footer                          ui.Footer
+	app                             fyne.App
+	mainWindow                      fyne.Window
+	accountAndTransactionsContainer *container.Split
+	leftAndEntryInfo                *container.Split
+	transactionEditRow              int
 }
 
 func (ad *AppData) accountSelected(id widget.ListItemID) {
@@ -45,6 +47,24 @@ func (ad *AppData) accountSelected(id widget.ListItemID) {
 
 	if err != nil {
 		panic(err)
+	}
+}
+
+func (ad *AppData) HideInfoPane() {
+	ad.leftAndEntryInfo.Trailing = container.NewHBox()
+	ad.leftAndEntryInfo.SetOffset(1.0)
+}
+
+func (ad *AppData) UnhideInfoPane() {
+	ad.leftAndEntryInfo.Trailing = &ad.entryInfoPanel.Form
+	ad.leftAndEntryInfo.SetOffset(0.8)
+}
+
+func (ad *AppData) ToggleInfoPaneVisibility() {
+	if ad.leftAndEntryInfo.Trailing == &ad.entryInfoPanel.Form {
+		ad.HideInfoPane()
+	} else {
+		ad.UnhideInfoPane()
 	}
 }
 
@@ -65,9 +85,14 @@ func (ad *AppData) onTransactionFormCancel() {
 	fmt.Println("Cancelling")
 }
 
+func (ad *AppData) onInfoButtonTapped() {
+	ad.ToggleInfoPaneVisibility()
+}
+
 func (ad *AppData) makeUI(mainWindow fyne.Window) *fyne.Container {
 	// ad.SetSelectedAccount(0)
 	ad.header = ui.MakeHeader()
+	ad.header.InfoButton.OnTapped = ad.onInfoButtonTapped
 	ad.footer = *ui.NewFooter()
 	ad.accountList = ui.MakeAccountList(&ad.Accounts)
 	ad.transactionsTable = ui.MakeTransactionsTable(&ad.Transactions, ad.mainWindow)
@@ -81,15 +106,15 @@ func (ad *AppData) makeUI(mainWindow fyne.Window) *fyne.Container {
 
 	footerContainer := container.NewHBox(ad.footer.Label)
 
-	accountsAndTransactions := container.NewHSplit(ad.accountList, ad.transactionsTable.Table)
-	accountsAndTransactions.SetOffset(0.2)
-	allSplits := container.NewHSplit(accountsAndTransactions, &ad.entryInfoPanel.Form)
-	allSplits.SetOffset(0.8)
+	ad.accountAndTransactionsContainer = container.NewHSplit(ad.accountList, ad.transactionsTable.Table)
+	ad.accountAndTransactionsContainer.SetOffset(0.2)
+	ad.leftAndEntryInfo = container.NewHSplit(ad.accountAndTransactionsContainer, &ad.entryInfoPanel.Form)
+	ad.leftAndEntryInfo.SetOffset(0.8)
 	ad.transactionsTable.Table.Refresh()
 
 	return container.NewBorder(
 		ad.header.Container, footerContainer, nil, nil,
-		allSplits,
+		ad.leftAndEntryInfo,
 	)
 }
 
@@ -165,9 +190,9 @@ func RunApp(ad *AppData) {
 	)
 	ad.mainWindow.Resize(fyne.NewSize(1000, 600))
 	ad.mainWindow.SetContent(ad.makeUI(ad.mainWindow))
-	ad.header.InfoButton.OnTapped = ad.modifyTransaction
+	// ad.header.InfoButton.OnTapped = ad.modifyTransaction
 	ad.mainWindow.ShowAndRun()
 }
 
-func (ad *AppData) modifyTransaction() {
-}
+// func (ad *AppData) modifyTransaction() {
+// }
