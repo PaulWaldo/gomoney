@@ -50,18 +50,24 @@ func (ad *AppData) accountSelected(id widget.ListItemID) {
 	}
 }
 
+func (ad *AppData) onInfoButtonTapped() {
+	ad.ToggleInfoPaneVisibility()
+}
+
 func (ad *AppData) HideInfoPane() {
-	ad.leftAndEntryInfo.Trailing = container.NewHBox()
+	ad.entryInfoPanel.Form.Hide()
 	ad.leftAndEntryInfo.SetOffset(1.0)
+	ad.leftAndEntryInfo.Trailing.Refresh()
 }
 
 func (ad *AppData) UnhideInfoPane() {
-	ad.leftAndEntryInfo.Trailing = &ad.entryInfoPanel.Form
+	ad.entryInfoPanel.Form.Show()
 	ad.leftAndEntryInfo.SetOffset(0.8)
+	ad.leftAndEntryInfo.Trailing.Refresh()
 }
 
 func (ad *AppData) ToggleInfoPaneVisibility() {
-	if ad.leftAndEntryInfo.Trailing == &ad.entryInfoPanel.Form {
+	if ad.entryInfoPanel.Form.Visible() {
 		ad.HideInfoPane()
 	} else {
 		ad.UnhideInfoPane()
@@ -85,10 +91,6 @@ func (ad *AppData) onTransactionFormCancel() {
 	fmt.Println("Cancelling")
 }
 
-func (ad *AppData) onInfoButtonTapped() {
-	ad.ToggleInfoPaneVisibility()
-}
-
 func (ad *AppData) makeUI(mainWindow fyne.Window) *fyne.Container {
 	// ad.SetSelectedAccount(0)
 	ad.header = ui.MakeHeader()
@@ -108,7 +110,8 @@ func (ad *AppData) makeUI(mainWindow fyne.Window) *fyne.Container {
 
 	ad.accountAndTransactionsContainer = container.NewHSplit(ad.accountList, ad.transactionsTable.Table)
 	ad.accountAndTransactionsContainer.SetOffset(0.2)
-	ad.leftAndEntryInfo = container.NewHSplit(ad.accountAndTransactionsContainer, &ad.entryInfoPanel.Form)
+	x := container.New(ui.NewCollapsibleLayout(), &ad.entryInfoPanel.Form)
+	ad.leftAndEntryInfo = container.NewHSplit(ad.accountAndTransactionsContainer, x)
 	ad.leftAndEntryInfo.SetOffset(0.8)
 	ad.transactionsTable.Table.Refresh()
 
