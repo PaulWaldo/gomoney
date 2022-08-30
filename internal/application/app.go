@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 	"github.com/PaulWaldo/gomoney/internal/application/ui"
@@ -19,10 +20,15 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+const (
+	PrefKeyDBFile = "db_file"
+)
+
 type AppData struct {
-	Service      domain.Services
-	Accounts     []models.Account
-	Transactions []models.Transaction
+	Service          *domain.Services
+	Accounts         []models.Account
+	Transactions     []models.Transaction
+	DatabaseFileName binding.String
 	// selectedAccount uint
 	// UI Components
 	accountList                     *widget.List
@@ -132,28 +138,32 @@ func (ad *AppData) openDatabase(file string) error {
 			Colorful:                  true,        // Disable color
 		},
 	)
-	services, _, err := db.NewSqliteDiskServices(file, &gorm.Config{
+	var err error
+	ad.Service, _, err = db.NewSqliteDiskServices(file, &gorm.Config{
 		SkipDefaultTransaction: true,
 		Logger:                 newLogger,
 	})
 	if err != nil {
 		return err
 	}
-	ad.Transactions, _, err = services.Transaction.List()
+	ad.Transactions, _, err = ad.Service.Transaction.List()
 	if err != nil {
 		return err
 	}
-	ad.Accounts, err = services.Account.List()
+	ad.Accounts, err = ad.Service.Account.List()
 	if err != nil {
 		return err
 	}
+	ad.app.Preferences().SetString(PrefKeyDBFile, file)
+	ad.accountList.Refresh()
+	ad.transactionsTable.Table.Refresh()
 	return nil
 }
 
-func (ad *AppData) chooseDatabaseFile(w fyne.Window) (filename string, err error) {
+func (ad *AppData) chooseDatabaseFile() (filename string, err error) {
 	dialog.ShowFileOpen(func(rc fyne.URIReadCloser, e error) {
 		if e != nil {
-			dialog.ShowError(e, w)
+			dialog.ShowError(e, ad.mainWindow)
 			err = e
 			return
 		}
@@ -162,15 +172,19 @@ func (ad *AppData) chooseDatabaseFile(w fyne.Window) (filename string, err error
 		}
 		filename := rc.URI().Path()
 		fmt.Println(filename)
-		ad.openDatabase(filename)
-	}, w)
+		err = ad.openDatabase(filename)
+		if err != nil {
+			dialog.ShowError(err, ad.mainWindow)
+			return
+		}
+	}, ad.mainWindow)
 	return filename, err
 }
 
-func (ad *AppData) createDatabaseFile(w fyne.Window) {
+func (ad *AppData) createDatabaseFile() {
 	dialog.ShowFileSave(func(rc fyne.URIWriteCloser, e error) {
 		if e != nil {
-			dialog.ShowError(e, w)
+			dialog.ShowError(e, ad.mainWindow)
 			return
 		}
 		if rc == nil {
@@ -178,24 +192,56 @@ func (ad *AppData) createDatabaseFile(w fyne.Window) {
 		}
 		filename := rc.URI().Path()
 		fmt.Println(filename)
-		ad.openDatabase(filename)
-	}, w)
+		err := ad.openDatabase(filename)
+		if err != nil {
+			dialog.ShowError(err, ad.mainWindow)
+			return
+		}
+	}, ad.mainWindow)
 }
 
+func (ad *AppData) loadDefaults() {
+	dbFile := ad.app.Preferences().String(PrefKeyDBFile)
+	if len(dbFile) == 0 {
+		return
+	}
+	// Stat the file first, as Sqlite will happily "open" a filename that does not exist
+	if _, err := os.Stat(dbFile); err != nil {
+		e := fmt.Errorf("unable to open database \"%s\"\n%w", dbFile, err)
+		dialog.ShowError(e, ad.mainWindow)
+		return
+	}
+	if err := ad.openDatabase(dbFile); err != nil {
+		e := fmt.Errorf("unable to open database \"%s\"\n%w", dbFile, err)
+		dialog.ShowError(e, ad.mainWindow)
+		return
+	}
+}
+
+func (ad *AppData) setupWindowTitleListener() {
+	dbFileBinding := binding.BindPreferenceString(PrefKeyDBFile, ad.app.Preferences())
+	titleBinding := binding.StringToStringWithFormat(dbFileBinding, "MoneyMinder - %s")
+	l := binding.NewDataListener(func() {
+		t, _ := titleBinding.Get()
+		ad.mainWindow.SetTitle(t)
+	})
+	titleBinding.AddListener(l)
+}
+
+const appId = "com.github.paulwaldo.gomoney"
+
 func RunApp(ad *AppData) {
-	ad.app = app.New()
+	ad.app = app.NewWithID(appId)
 	ad.mainWindow = ad.app.NewWindow("MoneyMinder")
+	ad.setupWindowTitleListener()
 	ad.mainWindow.SetMainMenu(fyne.NewMainMenu(
 		fyne.NewMenu("File",
-			fyne.NewMenuItem("New...", func() { ad.createDatabaseFile(ad.mainWindow) }),
-			fyne.NewMenuItem("Open...", func() { ad.chooseDatabaseFile(ad.mainWindow) }),
+			fyne.NewMenuItem("New...", func() { ad.createDatabaseFile() }),
+			fyne.NewMenuItem("Open...", func() { ad.chooseDatabaseFile() }),
 		)),
 	)
 	ad.mainWindow.Resize(fyne.NewSize(1000, 600))
 	ad.mainWindow.SetContent(ad.makeUI(ad.mainWindow))
-	// ad.header.InfoButton.OnTapped = ad.modifyTransaction
+	ad.loadDefaults()
 	ad.mainWindow.ShowAndRun()
 }
-
-// func (ad *AppData) modifyTransaction() {
-// }

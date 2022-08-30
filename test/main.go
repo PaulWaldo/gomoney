@@ -14,8 +14,8 @@ func main() {
 	label := widget.NewLabel("I am a longish label that just sits here")
 
 	buttons := container.NewVBox(
-		widget.NewButton("Show", func() {label.Show()}),
-		widget.NewButton("Hide", func() {label.Hide()}),
+		widget.NewButton("Show", func() { label.Show() }),
+		widget.NewButton("Hide", func() { label.Hide() }),
 	)
 
 	c := container.NewHSplit(buttons, label)

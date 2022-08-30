@@ -12,7 +12,7 @@ import (
 )
 
 func connectToDatabase(dsn string, gormConfig *gorm.Config) (*gorm.DB, error) {
-	// In-memory sqlite if no database name is specified
+	// Assumes that dsn has been validated as an existing file
 	db, err := gorm.Open(sqlite.Open(dsn), gormConfig)
 	if err != nil {
 		return nil, err

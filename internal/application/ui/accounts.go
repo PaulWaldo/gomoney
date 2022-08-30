@@ -21,6 +21,9 @@ func MakeAccountList(accounts *[]models.Account) *widget.List {
 			return widget.NewLabel("My Checking Account")
 		},
 		func(i widget.ListItemID, o fyne.CanvasObject) {
+			if len(bindings) == 0 {
+				return
+			}
 			name, err := bindings[i].GetItem("Name")
 			if err != nil {
 				panic(err)
