@@ -16,6 +16,6 @@ func NewFooter() *Footer {
 	return &Footer{Label: w /*Container: container.NewHBox(w)*/}
 }
 
-func (f *Footer) SetNumTransactions(n int64) {
+func (f *Footer) SetNumTransactions(n int) {
 	f.Label.SetText(fmt.Sprintf("%d Transactions", n))
 }

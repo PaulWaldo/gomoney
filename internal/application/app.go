@@ -46,10 +46,9 @@ type AppData struct {
 func (ad *AppData) accountSelected(id widget.ListItemID) {
 	account := ad.Accounts[id]
 	var err error
-	var count int64
-	ad.Transactions, count, err = ad.Service.Transaction.ListByAccount(account.ID)
+	ad.Transactions, err = ad.Service.Transaction.ListByAccount(account.ID)
 	// ad.transactionsTable.Refresh()
-	ad.footer.SetNumTransactions(count)
+	ad.footer.SetNumTransactions(len(ad.Transactions))
 
 	if err != nil {
 		panic(err)
@@ -110,7 +109,7 @@ func (ad *AppData) makeUI(mainWindow fyne.Window) *fyne.Container {
 	ad.transactionsTable.SetOnSelectedCallback(ad.transactionSelected)
 	ad.entryInfoPanel.Form.OnCancel = ad.onTransactionFormCancel
 	ad.entryInfoPanel.Form.OnSubmit = ad.onTransactionFormSubmit
-	ad.footer.SetNumTransactions(int64(len(ad.Transactions)))
+	ad.footer.SetNumTransactions(len(ad.Transactions))
 
 	footerContainer := container.NewHBox(ad.footer.Label)
 
@@ -146,7 +145,7 @@ func (ad *AppData) openDatabase(file string) error {
 	if err != nil {
 		return err
 	}
-	ad.Transactions, _, err = ad.Service.Transaction.List()
+	ad.Transactions, err = ad.Service.Transaction.List()
 	if err != nil {
 		return err
 	}
