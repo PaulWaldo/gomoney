@@ -6,6 +6,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var _ domain.AccountSvc = accountSvc{}
+
 type accountSvc struct {
 	db *gorm.DB
 }
@@ -30,8 +32,14 @@ func (as accountSvc) List() ([]models.Account, error) {
 	res := as.db.Preload("Transactions").Find(&accounts)
 	return accounts, res.Error
 }
+
 func (as accountSvc) AddTransactions(a models.Account, transactions []models.Transaction) error {
 	a.Transactions = append(a.Transactions, transactions...)
+	err := as.db.Save(a).Error
+	return err
+}
+
+func (as accountSvc) Update(a *models.Account) error {
 	err := as.db.Save(a).Error
 	return err
 }

@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/PaulWaldo/gomoney/pkg/domain/models"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_accountSvc_Create(t *testing.T) {
@@ -178,4 +180,32 @@ func Test_accountSvc_AddTransactions(t *testing.T) {
 	if len(gotAcct.Transactions) != len(txns) {
 		t.Fatalf("Expecting %d transaction in Account, got %d", len(txns), len(acct.Transactions))
 	}
+}
+
+func Test_accountSvc_Update(t *testing.T) {
+	teardownTest, tx := setupTest(t, db)
+	defer teardownTest(t)
+
+	saved := models.Account{
+		Name: "Account",
+		Type: models.Checking.Slug,
+	}
+	tx = tx.Create(&saved)
+	assert.NoError(t, tx.Error, "Unable to save initial record: %s")
+
+	saved.Name = "Changed"
+	saved.Type = models.Savings.Slug
+	transactions := []models.Transaction{{Payee: "p1"}, {Payee: "p2"}}
+	saved.Transactions = transactions
+	as := NewAccountSvc(tx)
+	err := as.Update(&saved)
+	assert.NoError(t, err, "Update threw error: %s", err)
+
+	var loaded = models.Account{}
+	err = tx.Model(&models.Account{}).Preload("Transactions").First(&loaded, saved.ID).Error
+	require.NoError(t, err, "Result load threw error: %s", err)
+	assert.Equal(t, loaded.Name, "Changed")
+	assert.Equal(t, loaded.Type, models.Savings.Slug)
+	require.Equal(t, len(transactions), len(loaded.Transactions), "Expecting %d transactions, got %d", len(transactions), len(loaded.Transactions))
+	// assert.ElementsMatch(t, transactions, loaded.Transactions)
 }
