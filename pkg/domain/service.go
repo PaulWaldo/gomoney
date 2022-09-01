@@ -17,7 +17,7 @@ type TransactionSvc interface {
 	Get(id uint) (models.Transaction, error)
 	List() ([]models.Transaction, error)
 	ListByAccount(accountId uint) ([]models.Transaction, error)
-	// Update(*models.Account) error
+	Update(*models.Transaction) error
 }
 
 type Services struct {

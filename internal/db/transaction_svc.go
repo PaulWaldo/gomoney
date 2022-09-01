@@ -44,3 +44,7 @@ func (ts transactionSvc) AddTransactions(a models.Account, transactions []models
 	err := ts.db.Save(a).Error
 	return err
 }
+
+func (ts transactionSvc) Update(t *models.Transaction) error{
+	return ts.db.Save(t).Error
+}

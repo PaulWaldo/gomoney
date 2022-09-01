@@ -110,7 +110,7 @@ func Test_transactionSvc_Get(t *testing.T) {
 	}
 }
 
-func TestList(t *testing.T) {
+func Test_transactionSvc_List(t *testing.T) {
 	teardownTest, tx := setupTest(t, db)
 	defer teardownTest(t)
 	const numTxs = 10
@@ -171,7 +171,7 @@ func TestList(t *testing.T) {
 // 	}
 // }
 
-func Test__transactionSvc_ListByAccount_ReturnsOnlySelectedTransactions(t *testing.T) {
+func Test_transactionSvc_ListByAccount_ReturnsOnlySelectedTransactions(t *testing.T) {
 	teardownTest, tx := setupTest(t, db)
 	defer teardownTest(t)
 	accounts := []models.Account{{Name: "acct1"}, {Name: "acct2"}}
@@ -192,4 +192,31 @@ func Test__transactionSvc_ListByAccount_ReturnsOnlySelectedTransactions(t *testi
 	require.EqualValuesf(t, 2, len(got), "expecting 2 transactions for account ID accounts[1].ID, got %d", len(got))
 	assert.Equal(t, txns[2].Payee, got[0].Payee, "Expecting retrieved payee to be %s, got %s", txns[2].Payee, got[0].Payee)
 	assert.Equal(t, txns[3].Payee, got[1].Payee, "Expecting retrieved payee to be %s, got %s", txns[3].Payee, got[1].Payee)
+}
+
+func Test_transactionSvc_Update(t *testing.T) {
+	teardownTest, tx := setupTest(t, db)
+	defer teardownTest(t)
+
+	saved := models.Transaction{
+		Payee: "p1",
+		Type:  models.Checking.Slug,
+		Memo:  "m1",
+	}
+	tx = tx.Create(&saved)
+	assert.NoError(t, tx.Error, "Unable to save initial record: %s")
+
+	saved.Payee = "p2"
+	saved.Memo = "m2"
+	saved.Type = models.Savings.Slug
+	ts := NewTransactionSvc(tx)
+	err := ts.Update(&saved)
+	require.NoError(t, err, "Update threw error: %s", err)
+
+	var loaded = models.Transaction{}
+	err = tx.First(&loaded, saved.ID).Error
+	require.NoError(t, err, "Result load threw error: %s", err)
+	assert.Equal(t, loaded.Payee, "p2")
+	assert.Equal(t, loaded.Memo, "m2")
+	assert.Equal(t, loaded.Type, models.Savings.Slug)
 }
