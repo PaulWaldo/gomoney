@@ -1,4 +1,5 @@
 # https://github.com/tj-actions/coverage-badge-go
+name: "Coverage Badge"
 on:
   pull_request:
     branches:
