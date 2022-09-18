@@ -2,8 +2,6 @@ package models
 
 import (
 	"errors"
-
-	"gorm.io/gorm"
 )
 
 type AccountType struct {
@@ -41,7 +39,7 @@ func AccountTypeFromString(s string) (AccountType, error) {
 }
 
 type Account struct {
-	gorm.Model
+	ID           int64
 	Name         string
 	Type         string
 	Transactions []Transaction

@@ -2,9 +2,7 @@ package application
 
 import (
 	"fmt"
-	"log"
 	"os"
-	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -16,8 +14,6 @@ import (
 	"github.com/PaulWaldo/gomoney/internal/db"
 	"github.com/PaulWaldo/gomoney/pkg/domain"
 	"github.com/PaulWaldo/gomoney/pkg/domain/models"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 const (
@@ -47,7 +43,7 @@ func (ad *AppData) accountSelected(id widget.ListItemID) {
 	account := ad.Accounts[id]
 	var err error
 	ad.Transactions, err = ad.Service.Transaction.ListByAccount(account.ID)
-	// ad.transactionsTable.Refresh()
+	ad.transactionsTable.Table.Refresh()
 	ad.footer.SetNumTransactions(len(ad.Transactions))
 
 	if err != nil {
@@ -126,24 +122,21 @@ func (ad *AppData) makeUI(mainWindow fyne.Window) *fyne.Container {
 	)
 }
 
-func (ad *AppData) openDatabase(file string) error {
-	// useDefaultTransactions := true
-	newLogger := logger.New(
-		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
-		logger.Config{
-			SlowThreshold:             time.Second, // Slow SQL threshold
-			LogLevel:                  logger.Info, // Log level
-			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
-			Colorful:                  true,        // Disable color
-		},
-	)
+const useInMemoryDb = true
+
+func (ad *AppData) openDatabase(file, migDir string) error {
 	var err error
-	ad.Service, _, err = db.NewSqliteDiskServices(file, &gorm.Config{
-		SkipDefaultTransaction: true,
-		Logger:                 newLogger,
-	})
-	if err != nil {
-		return err
+	if useInMemoryDb {
+		ad.Service, err = db.NewSqliteInMemoryServices(migDir, true)
+		if err != nil {
+			return err
+		}
+	} else {
+		dsn := fmt.Sprintf("file:%s?_foreign_keys=on", file)
+		ad.Service, err = db.NewSqliteDiskServices(dsn, migDir)
+		if err != nil {
+			return err
+		}
 	}
 	ad.Transactions, err = ad.Service.Transaction.List()
 	if err != nil {
@@ -156,10 +149,11 @@ func (ad *AppData) openDatabase(file string) error {
 	ad.app.Preferences().SetString(PrefKeyDBFile, file)
 	ad.accountList.Refresh()
 	ad.transactionsTable.Table.Refresh()
+	ad.footer.SetNumTransactions(len(ad.Transactions))
 	return nil
 }
 
-func (ad *AppData) chooseDatabaseFile() (filename string, err error) {
+func (ad *AppData) chooseDatabaseFile(migDir string) (filename string, err error) {
 	dialog.ShowFileOpen(func(rc fyne.URIReadCloser, e error) {
 		if e != nil {
 			dialog.ShowError(e, ad.mainWindow)
@@ -171,7 +165,7 @@ func (ad *AppData) chooseDatabaseFile() (filename string, err error) {
 		}
 		filename := rc.URI().Path()
 		fmt.Println(filename)
-		err = ad.openDatabase(filename)
+		err = ad.openDatabase(filename, migDir)
 		if err != nil {
 			dialog.ShowError(err, ad.mainWindow)
 			return
@@ -180,7 +174,7 @@ func (ad *AppData) chooseDatabaseFile() (filename string, err error) {
 	return filename, err
 }
 
-func (ad *AppData) createDatabaseFile() {
+func (ad *AppData) createDatabaseFile(migDir string) {
 	dialog.ShowFileSave(func(rc fyne.URIWriteCloser, e error) {
 		if e != nil {
 			dialog.ShowError(e, ad.mainWindow)
@@ -191,7 +185,7 @@ func (ad *AppData) createDatabaseFile() {
 		}
 		filename := rc.URI().Path()
 		fmt.Println(filename)
-		err := ad.openDatabase(filename)
+		err := ad.openDatabase(filename, migDir)
 		if err != nil {
 			dialog.ShowError(err, ad.mainWindow)
 			return
@@ -199,7 +193,7 @@ func (ad *AppData) createDatabaseFile() {
 	}, ad.mainWindow)
 }
 
-func (ad *AppData) loadDefaults() {
+func (ad *AppData) loadDefaults(migDir string) {
 	dbFile := ad.app.Preferences().String(PrefKeyDBFile)
 	if len(dbFile) == 0 {
 		return
@@ -210,7 +204,7 @@ func (ad *AppData) loadDefaults() {
 		dialog.ShowError(e, ad.mainWindow)
 		return
 	}
-	if err := ad.openDatabase(dbFile); err != nil {
+	if err := ad.openDatabase(dbFile, migDir); err != nil {
 		e := fmt.Errorf("unable to open database \"%s\"\n%w", dbFile, err)
 		dialog.ShowError(e, ad.mainWindow)
 		return
@@ -233,14 +227,16 @@ func RunApp(ad *AppData) {
 	ad.app = app.NewWithID(appId)
 	ad.mainWindow = ad.app.NewWindow("MoneyMinder")
 	ad.setupWindowTitleListener()
+	const migrationsDir = "../../internal/db/migrations"
 	ad.mainWindow.SetMainMenu(fyne.NewMainMenu(
 		fyne.NewMenu("File",
-			fyne.NewMenuItem("New...", func() { ad.createDatabaseFile() }),
-			fyne.NewMenuItem("Open...", func() { ad.chooseDatabaseFile() }),
+			fyne.NewMenuItem("New...", func() { ad.createDatabaseFile(migrationsDir) }),
+			fyne.NewMenuItem("Open...", func() { ad.chooseDatabaseFile(migrationsDir) }),
 		)),
 	)
 	ad.mainWindow.Resize(fyne.NewSize(1000, 600))
 	ad.mainWindow.SetContent(ad.makeUI(ad.mainWindow))
-	ad.loadDefaults()
+	ad.loadDefaults(migrationsDir)
+
 	ad.mainWindow.ShowAndRun()
 }
