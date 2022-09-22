@@ -4,9 +4,9 @@ go 1.17
 
 require (
 	fyne.io/fyne/v2 v2.2.3
+	github.com/DATA-DOG/go-sqlmock v1.5.0
+	github.com/mattn/go-sqlite3 v1.14.12
 	github.com/stretchr/testify v1.8.0
-	gorm.io/driver/sqlite v1.3.6
-	gorm.io/gorm v1.23.8
 )
 
 require (
@@ -22,10 +22,7 @@ require (
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
-	github.com/jinzhu/inflection v1.0.0 // indirect
-	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jsummers/gobmp v0.0.0-20151104160322-e2ba15ffa76e // indirect
-	github.com/mattn/go-sqlite3 v1.14.12 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/srwiley/oksvg v0.0.0-20200311192757-870daf9aa564 // indirect
 	github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9 // indirect
