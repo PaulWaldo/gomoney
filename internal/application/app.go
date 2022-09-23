@@ -40,9 +40,13 @@ type AppData struct {
 }
 
 func (ad *AppData) accountSelected(id widget.ListItemID) {
-	account := ad.Accounts[id]
 	var err error
-	ad.Transactions, err = ad.Service.Transaction.ListByAccount(account.ID)
+	if id == 0 {
+		ad.Transactions, err = ad.Service.Transaction.List()
+	} else {
+		account := ad.Accounts[id-1]
+		ad.Transactions, err = ad.Service.Transaction.ListByAccount(account.ID)
+	}
 	ad.transactionsTable.Table.Refresh()
 	ad.footer.SetNumTransactions(len(ad.Transactions))
 

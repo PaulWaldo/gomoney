@@ -10,7 +10,7 @@ func MakeAccountList(accounts *[]models.Account) *widget.List {
 	return widget.NewList(
 		// length
 		func() int {
-			return len(*accounts)
+			return len(*accounts) + 1
 		},
 		// createItem
 		func() fyne.CanvasObject {
@@ -18,7 +18,13 @@ func MakeAccountList(accounts *[]models.Account) *widget.List {
 		},
 		// updateItem
 		func(i widget.ListItemID, o fyne.CanvasObject) {
-			o.(*widget.Label).SetText((*accounts)[i].Name)
+			var text string
+			if i == 0 {
+				text = "All Accounts"
+			} else {
+				text = (*accounts)[i-1].Name
+			}
+			o.(*widget.Label).SetText(text)
 		},
 	)
 }

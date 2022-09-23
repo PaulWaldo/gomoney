@@ -15,7 +15,7 @@ const migrationDir = "migrations"
 type accountServiceTestSuite struct {
 	suite.Suite
 	Services *domain.Services
-	AcctSvc    domain.AccountSvc
+	AcctSvc  domain.AccountSvc
 }
 
 func (suite *accountServiceTestSuite) SetupTest() {
@@ -33,7 +33,7 @@ func TestAccountServiceTestSuite(t *testing.T) {
 	suite.Run(t, new(accountServiceTestSuite))
 }
 
-func (suite *accountServiceTestSuite)Test_accountSvc_Create() {
+func (suite *accountServiceTestSuite) Test_accountSvc_Create() {
 	type fields struct {
 	}
 	type args struct {
@@ -71,7 +71,7 @@ func (suite *accountServiceTestSuite)Test_accountSvc_Create() {
 	}
 }
 
-func (suite *accountServiceTestSuite)Test_accountSvc_Update() {
+func (suite *accountServiceTestSuite) Test_accountSvc_Update() {
 	saved := models.Account{
 		Name: "Account",
 		Type: models.Checking.Slug,
@@ -91,7 +91,7 @@ func (suite *accountServiceTestSuite)Test_accountSvc_Update() {
 	assert.Equal(suite.T(), loaded.Type, models.Savings.Slug)
 }
 
-func (suite *accountServiceTestSuite)Test_accountSvc_Get() {
+func (suite *accountServiceTestSuite) Test_accountSvc_Get() {
 	saved := models.Account{
 		Name: "Account",
 		Type: models.Checking.Slug,
@@ -106,7 +106,7 @@ func (suite *accountServiceTestSuite)Test_accountSvc_Get() {
 	assert.Equal(suite.T(), loaded.Type, models.Checking.Slug)
 }
 
-func (suite *accountServiceTestSuite)Test_accountSvc_List() {
+func (suite *accountServiceTestSuite) Test_accountSvc_List() {
 	accounts := []models.Account{
 		{Name: "a1", Type: models.Checking.Slug},
 		{Name: "a2", Type: models.Savings.Slug},

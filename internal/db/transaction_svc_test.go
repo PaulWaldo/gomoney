@@ -110,7 +110,6 @@ func (suite *TransactionServiceTestSuite) Test_transactionSvc_List() {
 	}
 }
 
-
 func (suite *TransactionServiceTestSuite) Test_transactionSvc_ListByAccount_ReturnsOnlySelectedTransactions() {
 	txns := []models.Transaction{
 		// Account 1
@@ -134,9 +133,9 @@ func (suite *TransactionServiceTestSuite) Test_transactionSvc_ListByAccount_Retu
 
 func (suite *TransactionServiceTestSuite) Test_transactionSvc_Update() {
 	saved := models.Transaction{
-		Payee: "p1",
-		Type:  models.Checking.Slug,
-		Memo:  "m1",
+		Payee:     "p1",
+		Type:      models.Checking.Slug,
+		Memo:      "m1",
 		AccountID: suite.Accounts[0].ID,
 	}
 	err := suite.TxSvc.Create(&saved)
