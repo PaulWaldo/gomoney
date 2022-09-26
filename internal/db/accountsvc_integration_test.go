@@ -49,7 +49,7 @@ func (suite *accountServiceTestSuite) Test_accountSvc_Create() {
 		{
 			name:    "create success returns id",
 			fields:  fields{},
-			args:    args{account: models.Account{Name: "My Checking", Type: models.Checking.Slug}},
+			args:    args{account: models.Account{Name: "My Checking", Type: models.Checking.Slug, Memo: "m1", Routing: "123", AccountNumber: "567", Hidden: false, NetWorthInclude: false, BudgetInclude: false}},
 			want:    1,
 			wantErr: false,
 		},
@@ -63,10 +63,8 @@ func (suite *accountServiceTestSuite) Test_accountSvc_Create() {
 			}
 
 			got, err := suite.AcctSvc.Get(tt.args.account.ID)
-			require.NoError(suite.T(), err)
-			if !(tt.args.account.ID == got.ID && tt.args.account.Name == got.Name && tt.args.account.Type == got.Type) {
-				suite.T().Fatalf("accountSvc.Create() = \n%v\n, want \n%v\n", got, tt.args.account)
-			}
+			assert.NoError(suite.T(), err)
+			assert.EqualValues(suite.T(), got, tt.args.account)
 		})
 	}
 }
@@ -93,8 +91,14 @@ func (suite *accountServiceTestSuite) Test_accountSvc_Update() {
 
 func (suite *accountServiceTestSuite) Test_accountSvc_Get() {
 	saved := models.Account{
-		Name: "Account",
-		Type: models.Checking.Slug,
+		Name:            "Account",
+		Type:            models.Checking.Slug,
+		Memo:            "memo",
+		Routing:         "1234567",
+		AccountNumber:   "246810",
+		Hidden:          true,
+		NetWorthInclude: true,
+		BudgetInclude:   false,
 	}
 
 	err := suite.AcctSvc.Create(&saved)
@@ -108,9 +112,9 @@ func (suite *accountServiceTestSuite) Test_accountSvc_Get() {
 
 func (suite *accountServiceTestSuite) Test_accountSvc_List() {
 	accounts := []models.Account{
-		{Name: "a1", Type: models.Checking.Slug},
-		{Name: "a2", Type: models.Savings.Slug},
-		{Name: "a3", Type: models.CreditCard.Slug},
+		{Name: "a1", Type: models.Checking.Slug, Memo: "m1", Routing: "123", AccountNumber: "567", Hidden: false, NetWorthInclude: false, BudgetInclude: false},
+		{Name: "a2", Type: models.Savings.Slug, Memo: "m2", Routing: "123", AccountNumber: "567", Hidden: true, NetWorthInclude: true, BudgetInclude: true},
+		{Name: "a3", Type: models.CreditCard.Slug, Memo: "m3", Routing: "123", AccountNumber: "567", Hidden: false, NetWorthInclude: false, BudgetInclude: false},
 	}
 
 	saved := []models.Account{}

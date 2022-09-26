@@ -29,7 +29,7 @@ type AppData struct {
 	DatabaseFileName binding.String
 	// selectedAccount uint
 	// UI Components
-	accountList                     *widget.List
+	accountsPanel                   *ui.AccountsPanel
 	transactionsTable               ui.TransactionsTable
 	entryInfoPanel                  ui.EntryInfoPanel
 	header                          ui.Header
@@ -43,7 +43,7 @@ type AppData struct {
 	InMemDatabase                   bool
 }
 
-func (ad *AppData) accountSelected(id widget.ListItemID) {
+func (ad *AppData) onAccountSelected(id widget.ListItemID) {
 	var err error
 	if id == 0 {
 		ad.Transactions, err = ad.Service.Transaction.List()
@@ -52,6 +52,7 @@ func (ad *AppData) accountSelected(id widget.ListItemID) {
 		ad.Transactions, err = ad.Service.Transaction.ListByAccount(account.ID)
 	}
 	ad.transactionsTable.Table.Refresh()
+	ad.accountsPanel.SelectedAccountId = id
 	ad.footer.SetNumTransactions(len(ad.Transactions))
 
 	if err != nil {
@@ -100,16 +101,48 @@ func (ad *AppData) onTransactionFormCancel() {
 	fmt.Println("Cancelling")
 }
 
+func (ad *AppData) onNewAccount(saved bool, editedAccount models.Account) {
+	if saved {
+		err := ad.Service.Account.Create(&editedAccount)
+		if err != nil {
+			dialog.NewError(err, ad.mainWindow)
+			return
+		}
+		ad.Accounts, err = ad.Service.Account.List()
+		if err != nil {
+			dialog.NewError(err, ad.mainWindow)
+			return
+		}
+		ad.accountsPanel.List.Refresh()
+	}
+}
+
+func (ad *AppData) onEditAccount(saved bool, editedAccount models.Account) {
+	if saved {
+		err := ad.Service.Account.Update(&editedAccount)
+		if err != nil {
+			dialog.NewError(err, ad.mainWindow)
+			return
+		}
+		ad.Accounts, err = ad.Service.Account.List()
+		if err != nil {
+			dialog.NewError(err, ad.mainWindow)
+			return
+		}
+		ad.accountsPanel.List.Refresh()
+	}
+}
+
 func (ad *AppData) makeUI(mainWindow fyne.Window) *fyne.Container {
 	// ad.SetSelectedAccount(0)
 	ad.header = ui.MakeHeader()
 	ad.header.InfoButton.OnTapped = ad.onInfoButtonTapped
 	ad.footer = *ui.NewFooter()
-	ad.accountList = ui.MakeAccountList(&ad.Accounts)
+	ad.accountsPanel = ui.MakeAccountsPanel(&ad.Accounts, &mainWindow, ad.onNewAccount, ad.onEditAccount)
 	ad.transactionsTable = ui.MakeTransactionsTable(&ad.Transactions, ad.mainWindow)
 	ad.entryInfoPanel = *ui.MakeEntryInfoPanel()
 
-	ad.accountList.OnSelected = ad.accountSelected
+	ad.accountsPanel.List.OnSelected = ad.onAccountSelected
 	ad.transactionsTable.SetOnSelectedCallback(ad.transactionSelected)
 	ad.entryInfoPanel.Form.OnCancel = ad.onTransactionFormCancel
 	ad.entryInfoPanel.Form.OnSubmit = ad.onTransactionFormSubmit
@@ -117,7 +150,7 @@ func (ad *AppData) makeUI(mainWindow fyne.Window) *fyne.Container {
 
 	footerContainer := container.NewHBox(ad.footer.Label)
 
-	ad.accountAndTransactionsContainer = container.NewHSplit(ad.accountList, ad.transactionsTable.Table)
+	ad.accountAndTransactionsContainer = container.NewHSplit(ad.accountsPanel.Container, ad.transactionsTable.Table)
 	ad.accountAndTransactionsContainer.SetOffset(0.2)
 	x := container.New(ui.NewCollapsibleLayout(), &ad.entryInfoPanel.Form)
 	ad.leftAndEntryInfo = container.NewHSplit(ad.accountAndTransactionsContainer, x)
@@ -153,7 +186,7 @@ func (ad *AppData) openDatabase(file, migDir string) error {
 		return err
 	}
 	ad.app.Preferences().SetString(PrefKeyDBFile, file)
-	ad.accountList.Refresh()
+	ad.accountsPanel.List.Refresh()
 	ad.transactionsTable.Table.Refresh()
 	ad.footer.SetNumTransactions(len(ad.Transactions))
 	return nil
