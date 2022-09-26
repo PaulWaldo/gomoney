@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
 	"github.com/PaulWaldo/gomoney/internal/application/ui"
 	"github.com/PaulWaldo/gomoney/internal/db"
@@ -17,7 +18,8 @@ import (
 )
 
 const (
-	PrefKeyDBFile = "db_file"
+	PrefKeyDBFile           = "db_file"
+	PrefKeyLastOpenLocation = "last_open_dir"
 )
 
 type AppData struct {
@@ -37,6 +39,8 @@ type AppData struct {
 	accountAndTransactionsContainer *container.Split
 	leftAndEntryInfo                *container.Split
 	transactionEditRow              int
+	LoadSampleData                  bool
+	InMemDatabase                   bool
 }
 
 func (ad *AppData) accountSelected(id widget.ListItemID) {
@@ -126,17 +130,15 @@ func (ad *AppData) makeUI(mainWindow fyne.Window) *fyne.Container {
 	)
 }
 
-const useInMemoryDb = true
-
 func (ad *AppData) openDatabase(file, migDir string) error {
 	var err error
-	if useInMemoryDb {
-		ad.Service, err = db.NewSqliteInMemoryServices(migDir, true)
+	if ad.InMemDatabase {
+		ad.Service, err = db.NewSqliteInMemoryServices(migDir, ad.LoadSampleData)
 		if err != nil {
 			return err
 		}
 	} else {
-		dsn := fmt.Sprintf("file:%s?_foreign_keys=on", file)
+		dsn := fmt.Sprintf("file:%s", file)
 		ad.Service, err = db.NewSqliteDiskServices(dsn, migDir)
 		if err != nil {
 			return err
@@ -158,7 +160,8 @@ func (ad *AppData) openDatabase(file, migDir string) error {
 }
 
 func (ad *AppData) chooseDatabaseFile(migDir string) (filename string, err error) {
-	dialog.ShowFileOpen(func(rc fyne.URIReadCloser, e error) {
+	var chosenURI fyne.URI
+	d := dialog.NewFileOpen(func(rc fyne.URIReadCloser, e error) {
 		if e != nil {
 			dialog.ShowError(e, ad.mainWindow)
 			err = e
@@ -167,6 +170,8 @@ func (ad *AppData) chooseDatabaseFile(migDir string) (filename string, err error
 		if rc == nil {
 			return
 		}
+		chosenURI = rc.URI()
+		fmt.Printf("Chosen URI: %s\n", chosenURI)
 		filename := rc.URI().Path()
 		fmt.Println(filename)
 		err = ad.openDatabase(filename, migDir)
@@ -174,7 +179,27 @@ func (ad *AppData) chooseDatabaseFile(migDir string) (filename string, err error
 			dialog.ShowError(err, ad.mainWindow)
 			return
 		}
+		ad.app.Preferences().SetString(PrefKeyLastOpenLocation, chosenURI.String())
 	}, ad.mainWindow)
+
+	lastLoc := ad.app.Preferences().String(PrefKeyLastOpenLocation)
+	if len(lastLoc) > 0 {
+		// Use stored location
+		lastURI, err := storage.ParseURI(lastLoc)
+		if err != nil {
+			return "", err
+		}
+		lastLocDir, err := storage.Parent(lastURI)
+		if err != nil {
+			return "", err
+		}
+		listableURI, err := storage.ListerForURI(lastLocDir)
+		if err != nil {
+			return "", err
+		}
+		d.SetLocation(listableURI)
+	}
+	d.Show()
 	return filename, err
 }
 
@@ -231,7 +256,7 @@ func RunApp(ad *AppData) {
 	ad.app = app.NewWithID(appId)
 	ad.mainWindow = ad.app.NewWindow("MoneyMinder")
 	ad.setupWindowTitleListener()
-	const migrationsDir = "../../internal/db/migrations"
+	const migrationsDir = "internal/db/migrations"
 	ad.mainWindow.SetMainMenu(fyne.NewMainMenu(
 		fyne.NewMenu("File",
 			fyne.NewMenuItem("New...", func() { ad.createDatabaseFile(migrationsDir) }),

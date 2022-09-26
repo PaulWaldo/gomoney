@@ -16,9 +16,12 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/cmd/gomoney/gomoney.go",
+            "program": "${workspaceFolder}/gomoney.go",
+            "args": [
+                "-sampleData=1",
+                "-inMem=1",
+            ],
             "env": {
-                "GIN_MODE": "debug"
             }
         }
     ]
