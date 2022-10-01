@@ -10,6 +10,9 @@ import (
 
 var _ domain.AccountSvc = accountSvc{}
 
+const createColumnNames = "name, type, memo, routing, acct_number, hidden, net_worth_include, budget_include"
+const readColumnNames = "account_id, " + createColumnNames
+
 type accountSvc struct {
 	db *sql.DB
 }
@@ -20,13 +23,22 @@ func NewAccountSvc(db *sql.DB) domain.AccountSvc {
 
 func (as accountSvc) Create(account *models.Account) error {
 	err := WithTransaction(as.db, func(tx Transaction) error {
-		query := "INSERT INTO accounts(name, type) VALUES($1, $2)"
+		query := fmt.Sprintf("INSERT INTO accounts(%s) VALUES($1, $2, $3, $4, $5, $6, $7, $8)", createColumnNames)
 		stmt, err := tx.Prepare(query)
 		if err != nil {
 			return err
 		}
 		defer stmt.Close()
-		res, err := stmt.Exec(account.Name, account.Type)
+		res, err := stmt.Exec(
+			account.Name,
+			account.Type,
+			account.Memo,
+			account.Routing,
+			account.AccountNumber,
+			account.Hidden,
+			account.NetWorthInclude,
+			account.BudgetInclude,
+		)
 		if err != nil {
 			return err
 		}
@@ -46,13 +58,37 @@ func (as accountSvc) Create(account *models.Account) error {
 	return err
 }
 
+// const selectStmt = `
+// 		SELECT
+// 			account_id,
+// 			name,
+// 			type,
+// 			memo,
+// 			acct_number,
+// 			hidden,
+// 			net_worth_include,
+// 			budget_include
+// 		FROM accounts
+// `
+
 func (as accountSvc) Get(id int64) (models.Account, error) {
-	stmt, err := as.db.Prepare("SELECT account_id, name, type FROM accounts WHERE account_id = ?")
+	cmd := fmt.Sprintf("SELECT %s FROM accounts WHERE account_id = ?", readColumnNames)
+	stmt, err := as.db.Prepare(cmd)
 	if err != nil {
 		return models.Account{}, err
 	}
 	var got models.Account
-	err = stmt.QueryRow(id).Scan(&got.ID, &got.Name, &got.Type)
+	err = stmt.QueryRow(id).Scan(
+		&got.ID,
+		&got.Name,
+		&got.Type,
+		&got.Memo,
+		&got.Routing,
+		&got.AccountNumber,
+		&got.Hidden,
+		&got.NetWorthInclude,
+		&got.BudgetInclude,
+	)
 	if err != nil {
 		return models.Account{}, err
 	}
@@ -60,7 +96,8 @@ func (as accountSvc) Get(id int64) (models.Account, error) {
 }
 
 func (as accountSvc) List() ([]models.Account, error) {
-	rows, err := as.db.Query("SELECT account_id, name, type FROM accounts")
+	cmd := fmt.Sprintf("SELECT %s FROM accounts", readColumnNames)
+	rows, err := as.db.Query(cmd)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +105,17 @@ func (as accountSvc) List() ([]models.Account, error) {
 	var accounts []models.Account
 	for rows.Next() {
 		var a models.Account
-		err = rows.Scan(&a.ID, &a.Name, &a.Type)
+		err = rows.Scan(
+			&a.ID,
+			&a.Name,
+			&a.Type,
+			&a.Memo,
+			&a.Routing,
+			&a.AccountNumber,
+			&a.Hidden,
+			&a.NetWorthInclude,
+			&a.BudgetInclude,
+		)
 		if err != nil {
 			return nil, err
 		}

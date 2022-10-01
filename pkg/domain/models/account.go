@@ -39,8 +39,14 @@ func AccountTypeFromString(s string) (AccountType, error) {
 }
 
 type Account struct {
-	ID           int64
-	Name         string
-	Type         string
-	Transactions []Transaction
+	ID              int64
+	Name            string
+	Type            string
+	Memo            string
+	Routing         string
+	AccountNumber   string
+	Hidden          bool
+	NetWorthInclude bool
+	BudgetInclude   bool
+	Transactions    []Transaction
 }
