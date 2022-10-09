@@ -119,8 +119,8 @@ func (ad *AppData) onNewAccount(saved bool, editedAccount models.Account) {
 
 		// Create an "Initial Balance Record"
 		ib := models.Transaction{
-			Date: time.Now(),
-			Payee: "Initial Balance",
+			Date:      time.Now(),
+			Payee:     "Initial Balance",
 			AccountID: editedAccount.ID}
 		err = ad.Service.Transaction.Create(&ib)
 		if err != nil {
@@ -279,14 +279,16 @@ func (ad *AppData) createDatabaseFile(migDir string) {
 
 func (ad *AppData) loadDefaults(migDir string) {
 	dbFile := ad.app.Preferences().String(PrefKeyDBFile)
-	if len(dbFile) == 0 {
-		return
-	}
-	// Stat the file first, as Sqlite will happily "open" a filename that does not exist
-	if _, err := os.Stat(dbFile); err != nil {
-		e := fmt.Errorf("unable to open database \"%s\"\n%w", dbFile, err)
-		dialog.ShowError(e, ad.mainWindow)
-		return
+	if !ad.InMemDatabase {
+		if len(dbFile) == 0 {
+			return
+		}
+		// Stat the file first, as Sqlite will happily "open" a filename that does not exist
+		if _, err := os.Stat(dbFile); err != nil {
+			e := fmt.Errorf("unable to open database \"%s\"\n%w", dbFile, err)
+			dialog.ShowError(e, ad.mainWindow)
+			return
+		}
 	}
 	if err := ad.openDatabase(dbFile, migDir); err != nil {
 		e := fmt.Errorf("unable to open database \"%s\"\n%w", dbFile, err)
