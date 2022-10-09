@@ -3,6 +3,7 @@ package application
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -64,6 +65,13 @@ func (ad *AppData) onInfoButtonTapped() {
 	ad.ToggleInfoPaneVisibility()
 }
 
+func (ad *AppData) onTransactionAddButtonTapped() {
+	newTx := models.Transaction{Date: time.Now(), AccountID: int64(ad.accountsPanel.SelectedAccountId)}
+	ad.Transactions = append(ad.Transactions, newTx)
+	ad.Service.Transaction.Create(&newTx)
+	ad.transactionsTable.Table.Refresh()
+}
+
 func (ad *AppData) HideInfoPane() {
 	ad.entryInfoPanel.Form.Hide()
 	ad.leftAndEntryInfo.SetOffset(1.0)
@@ -108,12 +116,25 @@ func (ad *AppData) onNewAccount(saved bool, editedAccount models.Account) {
 			dialog.NewError(err, ad.mainWindow)
 			return
 		}
+
+		// Create an "Initial Balance Record"
+		ib := models.Transaction{
+			Date: time.Now(),
+			Payee: "Initial Balance",
+			AccountID: editedAccount.ID}
+		err = ad.Service.Transaction.Create(&ib)
+		if err != nil {
+			dialog.NewError(err, ad.mainWindow)
+			return
+		}
+
 		ad.Accounts, err = ad.Service.Account.List()
 		if err != nil {
 			dialog.NewError(err, ad.mainWindow)
 			return
 		}
 		ad.accountsPanel.List.Refresh()
+		ad.accountsPanel.List.Select(1)
 	}
 }
 
@@ -137,6 +158,7 @@ func (ad *AppData) makeUI(mainWindow fyne.Window) *fyne.Container {
 	// ad.SetSelectedAccount(0)
 	ad.header = ui.MakeHeader()
 	ad.header.InfoButton.OnTapped = ad.onInfoButtonTapped
+	ad.header.AddButton.OnTapped = ad.onTransactionAddButtonTapped
 	ad.footer = *ui.NewFooter()
 	ad.accountsPanel = ui.MakeAccountsPanel(&ad.Accounts, &mainWindow, ad.onNewAccount, ad.onEditAccount)
 	ad.transactionsTable = ui.MakeTransactionsTable(&ad.Transactions, ad.mainWindow)
