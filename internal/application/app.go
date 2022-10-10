@@ -53,6 +53,8 @@ func (ad *AppData) onAccountSelected(id widget.ListItemID) {
 		ad.Transactions, err = ad.Service.Transaction.ListByAccount(account.ID)
 	}
 	ad.transactionsTable.Table.Refresh()
+	numRows, _ := ad.transactionsTable.Table.Length()
+	ad.transactionsTable.Table.Select(widget.TableCellID{Row: numRows - 1})
 	ad.accountsPanel.SelectedAccountId = id
 	ad.footer.SetNumTransactions(len(ad.Transactions))
 
@@ -70,6 +72,8 @@ func (ad *AppData) onTransactionAddButtonTapped() {
 	ad.Transactions = append(ad.Transactions, newTx)
 	ad.Service.Transaction.Create(&newTx)
 	ad.transactionsTable.Table.Refresh()
+	numRows, _ := ad.transactionsTable.Table.Length()
+	ad.transactionsTable.Table.Select(widget.TableCellID{Row: numRows - 1})
 }
 
 func (ad *AppData) HideInfoPane() {
@@ -134,7 +138,7 @@ func (ad *AppData) onNewAccount(saved bool, editedAccount models.Account) {
 			return
 		}
 		ad.accountsPanel.List.Refresh()
-		ad.accountsPanel.List.Select(1)
+		ad.accountsPanel.List.Select(ad.accountsPanel.List.Length() - 1)
 	}
 }
 
