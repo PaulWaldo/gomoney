@@ -3,7 +3,7 @@ module github.com/PaulWaldo/gomoney
 go 1.17
 
 require (
-	fyne.io/fyne/v2 v2.2.3
+	fyne.io/fyne/v2 v2.2.4-0.20221011124246-423d71f51d68
 	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/stretchr/testify v1.8.0
 )
@@ -36,4 +36,4 @@ require (
 	honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2 // indirect
 )
 
-replace fyne.io/fyne/v2 => /Users/paul/src/third-party/fyne
+// replace fyne.io/fyne/v2 => /Users/paul/src/third-party/fyne
