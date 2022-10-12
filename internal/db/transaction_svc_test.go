@@ -95,6 +95,14 @@ func (suite *TransactionServiceTestSuite) Test_transactionSvc_List() {
 			AccountID: suite.Accounts[0].ID,
 			Balance:   2.2,
 		},
+		{
+			Payee:     "p2",
+			Type:      "t2",
+			Amount:    1.1,
+			Memo:      "m2",
+			Date:      time.Date(2010, time.November, 10, 23, 0, 0, 0, time.UTC),
+			AccountID: suite.Accounts[0].ID,
+		},
 	}
 
 	saved := []models.Transaction{}
