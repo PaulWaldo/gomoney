@@ -80,9 +80,17 @@ func (suite *TransactionServiceTestSuite) Test_transactionSvc_List() {
 		{
 			Payee:     "p1",
 			Type:      "t1",
-			Amount:    123.45,
+			Amount:    1.1,
 			Memo:      "m1",
 			Date:      time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC),
+			AccountID: suite.Accounts[0].ID,
+		},
+		{
+			Payee:     "p2",
+			Type:      "t2",
+			Amount:    1.1,
+			Memo:      "m2",
+			Date:      time.Date(2010, time.November, 10, 23, 0, 0, 0, time.UTC),
 			AccountID: suite.Accounts[0].ID,
 		},
 	}
@@ -116,8 +124,22 @@ func (suite *TransactionServiceTestSuite) Test_transactionSvc_ListByAccount_Retu
 		{Payee: "acct1payee1", AccountID: suite.Accounts[0].ID},
 		{Payee: "acct1payee2", AccountID: suite.Accounts[0].ID},
 		// Account 2
-		{Payee: "acct2payee1", AccountID: suite.Accounts[1].ID},
-		{Payee: "acct2payee2", AccountID: suite.Accounts[1].ID},
+		{
+			Payee:     "p1",
+			Type:      "t1",
+			Amount:    1.1,
+			Memo:      "m1",
+			Date:      time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC),
+			AccountID: suite.Accounts[1].ID,
+		},
+		{
+			Payee:     "p2",
+			Type:      "t2",
+			Amount:    1.1,
+			Memo:      "m2",
+			Date:      time.Date(2010, time.November, 10, 23, 0, 0, 0, time.UTC),
+			AccountID: suite.Accounts[1].ID,
+		},
 	}
 	for i := range txns {
 		err := suite.TxSvc.Create(&txns[i])
@@ -129,6 +151,8 @@ func (suite *TransactionServiceTestSuite) Test_transactionSvc_ListByAccount_Retu
 	require.EqualValuesf(suite.T(), 2, len(got), "expecting 2 transactions for account ID accounts[1].ID, got %d", len(got))
 	assert.Equal(suite.T(), txns[2].Payee, got[0].Payee, "Expecting retrieved payee to be %s, got %s", txns[2].Payee, got[0].Payee)
 	assert.Equal(suite.T(), txns[3].Payee, got[1].Payee, "Expecting retrieved payee to be %s, got %s", txns[3].Payee, got[1].Payee)
+	assert.Equal(suite.T(), 1.1, got[0].Balance)
+	assert.Equal(suite.T(), 2.2, got[1].Balance)
 }
 
 func (suite *TransactionServiceTestSuite) Test_transactionSvc_Update() {
