@@ -84,7 +84,6 @@ func (suite *TransactionServiceTestSuite) Test_transactionSvc_List() {
 			Memo:      "m1",
 			Date:      time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC),
 			AccountID: suite.Accounts[0].ID,
-			Balance:   1.1,
 		},
 		{
 			Payee:     "p2",
@@ -93,7 +92,6 @@ func (suite *TransactionServiceTestSuite) Test_transactionSvc_List() {
 			Memo:      "m2",
 			Date:      time.Date(2010, time.November, 10, 23, 0, 0, 0, time.UTC),
 			AccountID: suite.Accounts[0].ID,
-			Balance:   2.2,
 		},
 	}
 
