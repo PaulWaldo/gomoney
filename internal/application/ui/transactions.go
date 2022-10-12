@@ -28,12 +28,13 @@ func MakeTransactionsTable(transactions *[]models.Transaction, mainWindow fyne.W
 	// }
 	table := widget.NewTable(
 		func() (int, int) {
-			return len(*transactions), 4
+			return len(*transactions), 5
 		},
 		func() fyne.CanvasObject {
 			return widget.NewLabel("wide content")
 		},
 		func(i widget.TableCellID, o fyne.CanvasObject) {
+			l :=o.(*widget.Label)
 			switch i.Col {
 			// case 0:
 			// 	payee, err := bindings[i.Row].GetItem("Payee")
@@ -46,13 +47,17 @@ func MakeTransactionsTable(transactions *[]models.Transaction, mainWindow fyne.W
 			// 	}
 			// 	o.(*widget.Label).SetText(x)
 			case 0:
-				o.(*widget.Label).SetText((*transactions)[i.Row].Payee)
+				l.SetText((*transactions)[i.Row].Payee)
 			case 1:
-				o.(*widget.Label).SetText((*transactions)[i.Row].Date.Format(YYYYMMDD))
+				l.SetText((*transactions)[i.Row].Date.Format(YYYYMMDD))
 			case 2:
-				o.(*widget.Label).SetText(fmt.Sprintf("%.2f", (*transactions)[i.Row].Amount))
+				l.SetText(fmt.Sprintf("%.2f", (*transactions)[i.Row].Amount))
+				l.Alignment = fyne.TextAlignTrailing
 			case 3:
-				o.(*widget.Label).SetText((*transactions)[i.Row].Memo)
+				l.SetText((*transactions)[i.Row].Memo)
+			case 4:
+				l.SetText(fmt.Sprintf("%.2f", (*transactions)[i.Row].Balance))
+				l.Alignment = fyne.TextAlignTrailing
 			}
 		},
 	)

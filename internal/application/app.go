@@ -3,6 +3,7 @@ package application
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -52,6 +53,8 @@ func (ad *AppData) onAccountSelected(id widget.ListItemID) {
 		ad.Transactions, err = ad.Service.Transaction.ListByAccount(account.ID)
 	}
 	ad.transactionsTable.Table.Refresh()
+	numRows, _ := ad.transactionsTable.Table.Length()
+	ad.transactionsTable.Table.Select(widget.TableCellID{Row: numRows - 1})
 	ad.accountsPanel.SelectedAccountId = id
 	ad.footer.SetNumTransactions(len(ad.Transactions))
 
@@ -62,6 +65,15 @@ func (ad *AppData) onAccountSelected(id widget.ListItemID) {
 
 func (ad *AppData) onInfoButtonTapped() {
 	ad.ToggleInfoPaneVisibility()
+}
+
+func (ad *AppData) onTransactionAddButtonTapped() {
+	newTx := models.Transaction{Date: time.Now(), AccountID: int64(ad.accountsPanel.SelectedAccountId)}
+	ad.Transactions = append(ad.Transactions, newTx)
+	ad.Service.Transaction.Create(&newTx)
+	ad.transactionsTable.Table.Refresh()
+	numRows, _ := ad.transactionsTable.Table.Length()
+	ad.transactionsTable.Table.Select(widget.TableCellID{Row: numRows - 1})
 }
 
 func (ad *AppData) HideInfoPane() {
@@ -108,12 +120,25 @@ func (ad *AppData) onNewAccount(saved bool, editedAccount models.Account) {
 			dialog.NewError(err, ad.mainWindow)
 			return
 		}
+
+		// Create an "Initial Balance Record"
+		ib := models.Transaction{
+			Date:      time.Now(),
+			Payee:     "Initial Balance",
+			AccountID: editedAccount.ID}
+		err = ad.Service.Transaction.Create(&ib)
+		if err != nil {
+			dialog.NewError(err, ad.mainWindow)
+			return
+		}
+
 		ad.Accounts, err = ad.Service.Account.List()
 		if err != nil {
 			dialog.NewError(err, ad.mainWindow)
 			return
 		}
 		ad.accountsPanel.List.Refresh()
+		ad.accountsPanel.List.Select(ad.accountsPanel.List.Length() - 1)
 	}
 }
 
@@ -137,6 +162,7 @@ func (ad *AppData) makeUI(mainWindow fyne.Window) *fyne.Container {
 	// ad.SetSelectedAccount(0)
 	ad.header = ui.MakeHeader()
 	ad.header.InfoButton.OnTapped = ad.onInfoButtonTapped
+	ad.header.AddButton.OnTapped = ad.onTransactionAddButtonTapped
 	ad.footer = *ui.NewFooter()
 	ad.accountsPanel = ui.MakeAccountsPanel(&ad.Accounts, &mainWindow, ad.onNewAccount, ad.onEditAccount)
 	ad.transactionsTable = ui.MakeTransactionsTable(&ad.Transactions, ad.mainWindow)
@@ -257,14 +283,16 @@ func (ad *AppData) createDatabaseFile(migDir string) {
 
 func (ad *AppData) loadDefaults(migDir string) {
 	dbFile := ad.app.Preferences().String(PrefKeyDBFile)
-	if len(dbFile) == 0 {
-		return
-	}
-	// Stat the file first, as Sqlite will happily "open" a filename that does not exist
-	if _, err := os.Stat(dbFile); err != nil {
-		e := fmt.Errorf("unable to open database \"%s\"\n%w", dbFile, err)
-		dialog.ShowError(e, ad.mainWindow)
-		return
+	if !ad.InMemDatabase {
+		if len(dbFile) == 0 {
+			return
+		}
+		// Stat the file first, as Sqlite will happily "open" a filename that does not exist
+		if _, err := os.Stat(dbFile); err != nil {
+			e := fmt.Errorf("unable to open database \"%s\"\n%w", dbFile, err)
+			dialog.ShowError(e, ad.mainWindow)
+			return
+		}
 	}
 	if err := ad.openDatabase(dbFile, migDir); err != nil {
 		e := fmt.Errorf("unable to open database \"%s\"\n%w", dbFile, err)

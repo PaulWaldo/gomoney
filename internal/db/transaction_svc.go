@@ -38,7 +38,6 @@ func (ts transactionSvc) Create(t *models.Transaction) error {
 		}
 		defer stmt.Close()
 
-		// unixDate := t.Date.Unix()
 		res, err := stmt.Exec(t.Payee, t.Type, t.Amount, t.Memo, t.Date, t.AccountID)
 		if err != nil {
 			return err
@@ -77,12 +76,10 @@ func (ts transactionSvc) Get(id int64) (models.Transaction, error) {
 		return t, err
 	}
 	var got models.Transaction
-	// var gotDate int64
 	err = stmt.QueryRow(id).Scan(&got.ID, &got.Payee, &got.Type, &got.Amount, &got.Memo, &got.Date, &got.AccountID)
 	if err != nil {
 		return t, err
 	}
-	// got.Date = time.Unix(gotDate, 0)
 	return got, nil
 }
 
@@ -96,10 +93,13 @@ func (ts transactionSvc) ListByAccount(accountId int64) ([]models.Transaction, e
 			amount,
 			memo,
 			date,
-			account_id
+			account_id,
+			SUM (amount) OVER (
+				ORDER BY  date, transaction_id
+			) AS balance
 		FROM transactions
 		WHERE account_id = ?
-	`
+		ORDER BY date`
 
 	stmt, err := ts.db.Prepare(query)
 	if err != nil {
@@ -114,7 +114,7 @@ func (ts transactionSvc) ListByAccount(accountId int64) ([]models.Transaction, e
 
 	for rows.Next() {
 		var got models.Transaction
-		err = rows.Scan(&got.ID, &got.Payee, &got.Type, &got.Amount, &got.Memo, &got.Date, &got.AccountID)
+		err = rows.Scan(&got.ID, &got.Payee, &got.Type, &got.Amount, &got.Memo, &got.Date, &got.AccountID, &got.Balance)
 		if err != nil {
 			return txs, err
 		}
