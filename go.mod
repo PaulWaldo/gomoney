@@ -5,7 +5,7 @@ go 1.17
 require (
 	fyne.io/fyne/v2 v2.2.4-0.20221011124246-423d71f51d68
 	github.com/mattn/go-sqlite3 v1.14.15
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 )
 
 require (
