@@ -11,7 +11,7 @@ import (
 )
 
 type EntryInfoPanel struct {
-	Form        widget.Form
+	/*Form*/ widget.Form
 	payee       *widget.Entry
 	amount      *widget.Entry
 	memo        *widget.Entry

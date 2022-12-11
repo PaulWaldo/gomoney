@@ -5,7 +5,7 @@ import (
 )
 
 type Transaction struct {
-	ID int64 
+	ID        int64
 	Payee     string    `json:"payee,omitempty"`
 	Type      string    `json:"type,omitempty"`
 	Amount    float64   `json:"amount,omitempty"`

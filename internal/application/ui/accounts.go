@@ -15,7 +15,7 @@ import (
 )
 
 type AccountsPanel struct {
-	Container         *fyne.Container
+	/*Container*/ *fyne.Container
 	List              *widget.List
 	AddButton         *widget.Button
 	EditButton        *widget.Button
