@@ -50,8 +50,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/toml v1.1.0/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/BurntSushi/toml v1.3.2/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/PaulWaldo/fyne-headertable v0.0.2-0.20221211210825-079a4190f46a h1:3UEL+1ZtXCPgeZMjO0K/Tm0652/p/X+9nWL9OcYjtok=
-github.com/PaulWaldo/fyne-headertable v0.0.2-0.20221211210825-079a4190f46a/go.mod h1:ETgROXPeMie6dH04QBTInTOsaTKvhFX3jve93SXxAGY=
+github.com/PaulWaldo/fyne-headertable v0.0.2 h1:8wRXu0fxa8F50rM8YflFTOveLTWwDU3RYH3nccmGGHg=
+github.com/PaulWaldo/fyne-headertable v0.0.2/go.mod h1:ETgROXPeMie6dH04QBTInTOsaTKvhFX3jve93SXxAGY=
 github.com/akavel/rsrc v0.10.2/go.mod h1:uLoCtb9J+EyAqh+26kdrTgmzRBFPGOolLWKpdxkKq+c=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/armon/circbuf v0.0.0-20150827004946-bbbad097214e/go.mod h1:3U/XgcO3hCbHZ8TKRvWD2dDTCfh9M9ya+I9JpbB7O8o=
