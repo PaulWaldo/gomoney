@@ -6,7 +6,7 @@ require (
 	fyne.io/fyne/v2 v2.5.1
 	github.com/PaulWaldo/fyne-headertable v0.0.2
 	github.com/mattn/go-sqlite3 v1.14.16
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 )
 
 require (
