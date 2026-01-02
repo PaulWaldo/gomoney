@@ -1,11 +1,11 @@
 module github.com/PaulWaldo/gomoney
 
-go 1.17
+go 1.23.0
 
 require (
 	fyne.io/fyne/v2 v2.5.1
 	github.com/PaulWaldo/fyne-headertable v0.0.2
-	github.com/mattn/go-sqlite3 v1.14.28
+	github.com/mattn/go-sqlite3 v1.14.33
 	github.com/stretchr/testify v1.10.0
 )
 
